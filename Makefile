@@ -8,10 +8,10 @@
 #
 #   MakeMaker Parameters:
 
-#	EXE_FILES => [q[bin/CfgAliases], q[bin/CfgNamed], q[bin/CfgAliases,v]]
-#	MAN1PODS => { bin/CfgAliases=>q[./blib/man1/CfgAliases.$(MAN1EXT)], bin/CfgAliases,v=>q[./blib/man1/CfgAliases,v.$(MAN1EXT)], bin/CfgNamed=>q[./blib/man1/CfgNamed.$(MAN1EXT)] }
+#	EXE_FILES => [q[bin/CfgAliases], q[bin/CfgNamed], q[bin/DNS-find-free], q[bin/mail-validate]]
+#	MAN1PODS => { bin/mail-validate=>q[./blib/man1/mail-validate.$(MAN1EXT)], bin/DNS-find-free=>q[./blib/man1/DNS-find-free.$(MAN1EXT)], bin/CfgAliases=>q[./blib/man1/CfgAliases.$(MAN1EXT)], bin/CfgNamed=>q[./blib/man1/CfgNamed.$(MAN1EXT)] }
 #	NAME => q[CfgTie]
-#	VERSION => q[0.2]
+#	VERSION => q[0.3]
 #	VERSION_FROM => q[]
 #	clean => { FILES=>q[*% *.html *~ www-* .htp* .htg*] }
 #	dist => { COMPRESS=>q[gzip -9f], POSTOP=>q[mv $(DISTNAME)-$(VERSION).tar.gz ../], SUFFIX=>q[gz] }
@@ -47,9 +47,9 @@ AR_STATIC_ARGS = cr
 NAME = CfgTie
 DISTNAME = CfgTie
 NAME_SYM = CfgTie
-VERSION = 0.2
-VERSION_SYM = 0_2
-XS_VERSION = 0.2
+VERSION = 0.3
+VERSION_SYM = 0_3
+XS_VERSION = 0.3
 INST_BIN = ./blib/bin
 INST_EXE = ./blib/script
 INST_LIB = ./blib/lib
@@ -102,19 +102,22 @@ C_FILES =
 O_FILES = 
 H_FILES = 
 MAN1PODS = bin/CfgAliases \
-	bin/CfgAliases,v \
-	bin/CfgNamed
+	bin/CfgNamed \
+	bin/DNS-find-free \
+	bin/mail-validate
 MAN3PODS = lib/CfgTie/CfgArgs.pm \
 	lib/CfgTie/Cfgfile.pm \
 	lib/CfgTie/TieAliases.pm \
 	lib/CfgTie/TieGeneric.pm \
 	lib/CfgTie/TieGroup.pm \
 	lib/CfgTie/TieHost.pm \
+	lib/CfgTie/TieMTab.pm \
 	lib/CfgTie/TieNamed.pm \
 	lib/CfgTie/TieNet.pm \
 	lib/CfgTie/TiePh.pm \
 	lib/CfgTie/TieProto.pm \
 	lib/CfgTie/TieRCService.pm \
+	lib/CfgTie/TieRsrc.pm \
 	lib/CfgTie/TieServ.pm \
 	lib/CfgTie/TieShadow.pm \
 	lib/CfgTie/TieUser.pm \
@@ -158,84 +161,50 @@ EXPORT_LIST =
 PERL_ARCHIVE = 
 
 TO_INST_PM = lib/CfgTie/CfgArgs.pm \
-	lib/CfgTie/CfgArgs.pm,v \
 	lib/CfgTie/Cfgfile.pm \
-	lib/CfgTie/Cfgfile.pm,v \
 	lib/CfgTie/TieAliases.pm \
-	lib/CfgTie/TieAliases.pm,v \
 	lib/CfgTie/TieGeneric.pm \
-	lib/CfgTie/TieGeneric.pm,v \
 	lib/CfgTie/TieGroup.pm \
-	lib/CfgTie/TieGroup.pm,v \
 	lib/CfgTie/TieHost.pm \
-	lib/CfgTie/TieHost.pm,v \
+	lib/CfgTie/TieMTab.pm \
 	lib/CfgTie/TieNamed.pm \
-	lib/CfgTie/TieNamed.pm,v \
 	lib/CfgTie/TieNet.pm \
-	lib/CfgTie/TieNet.pm,v \
 	lib/CfgTie/TiePh.pm \
-	lib/CfgTie/TiePh.pm,v \
 	lib/CfgTie/TieProto.pm \
-	lib/CfgTie/TieProto.pm,v \
 	lib/CfgTie/TieRCService.pm \
-	lib/CfgTie/TieRCService.pm,v \
+	lib/CfgTie/TieRsrc.pm \
 	lib/CfgTie/TieServ.pm \
-	lib/CfgTie/TieServ.pm,v \
 	lib/CfgTie/TieShadow.pm \
-	lib/CfgTie/TieShadow.pm,v \
 	lib/CfgTie/TieUser.pm \
-	lib/CfgTie/TieUser.pm,v \
 	lib/CfgTie/filever.pm \
-	lib/CfgTie/filever.pm,v \
-	lib/CfgTie/makefile \
-	lib/CfgTie/tmp
+	lib/CfgTie/makefile
 
 PM_TO_BLIB = lib/CfgTie/TieGroup.pm \
 	$(INST_LIB)/CfgTie/TieGroup.pm \
-	lib/CfgTie/filever.pm,v \
-	$(INST_LIB)/CfgTie/filever.pm,v \
 	lib/CfgTie/Cfgfile.pm \
 	$(INST_LIB)/CfgTie/Cfgfile.pm \
-	lib/CfgTie/TieGroup.pm,v \
-	$(INST_LIB)/CfgTie/TieGroup.pm,v \
-	lib/CfgTie/Cfgfile.pm,v \
-	$(INST_LIB)/CfgTie/Cfgfile.pm,v \
 	lib/CfgTie/makefile \
 	$(INST_LIB)/CfgTie/makefile \
 	lib/CfgTie/TieProto.pm \
 	$(INST_LIB)/CfgTie/TieProto.pm \
-	lib/CfgTie/TieProto.pm,v \
-	$(INST_LIB)/CfgTie/TieProto.pm,v \
 	lib/CfgTie/TiePh.pm \
 	$(INST_LIB)/CfgTie/TiePh.pm \
-	lib/CfgTie/TiePh.pm,v \
-	$(INST_LIB)/CfgTie/TiePh.pm,v \
+	lib/CfgTie/TieRsrc.pm \
+	$(INST_LIB)/CfgTie/TieRsrc.pm \
 	lib/CfgTie/CfgArgs.pm \
 	$(INST_LIB)/CfgTie/CfgArgs.pm \
-	lib/CfgTie/CfgArgs.pm,v \
-	$(INST_LIB)/CfgTie/CfgArgs.pm,v \
 	lib/CfgTie/TieGeneric.pm \
 	$(INST_LIB)/CfgTie/TieGeneric.pm \
 	lib/CfgTie/TieHost.pm \
 	$(INST_LIB)/CfgTie/TieHost.pm \
 	lib/CfgTie/TieUser.pm \
 	$(INST_LIB)/CfgTie/TieUser.pm \
-	lib/CfgTie/TieGeneric.pm,v \
-	$(INST_LIB)/CfgTie/TieGeneric.pm,v \
-	lib/CfgTie/TieHost.pm,v \
-	$(INST_LIB)/CfgTie/TieHost.pm,v \
 	lib/CfgTie/TieServ.pm \
 	$(INST_LIB)/CfgTie/TieServ.pm \
-	lib/CfgTie/TieUser.pm,v \
-	$(INST_LIB)/CfgTie/TieUser.pm,v \
 	lib/CfgTie/TieAliases.pm \
 	$(INST_LIB)/CfgTie/TieAliases.pm \
-	lib/CfgTie/TieServ.pm,v \
-	$(INST_LIB)/CfgTie/TieServ.pm,v \
-	lib/CfgTie/tmp \
-	$(INST_LIB)/CfgTie/tmp \
-	lib/CfgTie/TieAliases.pm,v \
-	$(INST_LIB)/CfgTie/TieAliases.pm,v \
+	lib/CfgTie/TieMTab.pm \
+	$(INST_LIB)/CfgTie/TieMTab.pm \
 	lib/CfgTie/TieNamed.pm \
 	$(INST_LIB)/CfgTie/TieNamed.pm \
 	lib/CfgTie/TieRCService.pm \
@@ -244,14 +213,6 @@ PM_TO_BLIB = lib/CfgTie/TieGroup.pm \
 	$(INST_LIB)/CfgTie/TieShadow.pm \
 	lib/CfgTie/TieNet.pm \
 	$(INST_LIB)/CfgTie/TieNet.pm \
-	lib/CfgTie/TieNamed.pm,v \
-	$(INST_LIB)/CfgTie/TieNamed.pm,v \
-	lib/CfgTie/TieRCService.pm,v \
-	$(INST_LIB)/CfgTie/TieRCService.pm,v \
-	lib/CfgTie/TieShadow.pm,v \
-	$(INST_LIB)/CfgTie/TieShadow.pm,v \
-	lib/CfgTie/TieNet.pm,v \
-	$(INST_LIB)/CfgTie/TieNet.pm,v \
 	lib/CfgTie/filever.pm \
 	$(INST_LIB)/CfgTie/filever.pm
 
@@ -489,61 +450,70 @@ POD2MAN = $(PERL) -we '%m=@ARGV;for (keys %m){' \
 -e 'system(qq[$$^X ].q["-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" $(POD2MAN_EXE) ].qq[$$_>$$m{$$_}])==0 or warn "Couldn\047t install $$m{$$_}\n";' \
 -e 'chmod 0644, $$m{$$_} or warn "chmod 644 $$m{$$_}: $$!\n";}'
 
-manifypods : bin/CfgAliases \
-	bin/CfgAliases,v \
+manifypods : bin/mail-validate \
+	bin/DNS-find-free \
+	bin/CfgAliases \
 	bin/CfgNamed \
-	lib/CfgTie/TieGeneric.pm \
 	lib/CfgTie/TieGroup.pm \
-	lib/CfgTie/TieHost.pm \
 	lib/CfgTie/Cfgfile.pm \
+	lib/CfgTie/TieProto.pm \
+	lib/CfgTie/TiePh.pm \
+	lib/CfgTie/TieRsrc.pm \
+	lib/CfgTie/CfgArgs.pm \
+	lib/CfgTie/TieGeneric.pm \
+	lib/CfgTie/TieHost.pm \
 	lib/CfgTie/TieUser.pm \
 	lib/CfgTie/TieServ.pm \
 	lib/CfgTie/TieAliases.pm \
-	lib/CfgTie/TieProto.pm \
+	lib/CfgTie/TieMTab.pm \
 	lib/CfgTie/TieNamed.pm \
-	lib/CfgTie/TieShadow.pm \
 	lib/CfgTie/TieRCService.pm \
+	lib/CfgTie/TieShadow.pm \
 	lib/CfgTie/TieNet.pm \
-	lib/CfgTie/TiePh.pm \
-	lib/CfgTie/filever.pm \
-	lib/CfgTie/CfgArgs.pm
+	lib/CfgTie/filever.pm
 	@$(POD2MAN) \
+	bin/mail-validate \
+	./blib/man1/mail-validate.$(MAN1EXT) \
+	bin/DNS-find-free \
+	./blib/man1/DNS-find-free.$(MAN1EXT) \
 	bin/CfgAliases \
 	./blib/man1/CfgAliases.$(MAN1EXT) \
-	bin/CfgAliases,v \
-	./blib/man1/CfgAliases,v.$(MAN1EXT) \
 	bin/CfgNamed \
 	./blib/man1/CfgNamed.$(MAN1EXT) \
-	lib/CfgTie/TieGeneric.pm \
-	$(INST_MAN3DIR)/CfgTie::TieGeneric.$(MAN3EXT) \
 	lib/CfgTie/TieGroup.pm \
 	$(INST_MAN3DIR)/CfgTie::TieGroup.$(MAN3EXT) \
-	lib/CfgTie/TieHost.pm \
-	$(INST_MAN3DIR)/CfgTie::TieHost.$(MAN3EXT) \
 	lib/CfgTie/Cfgfile.pm \
 	$(INST_MAN3DIR)/CfgTie::Cfgfile.$(MAN3EXT) \
+	lib/CfgTie/TieProto.pm \
+	$(INST_MAN3DIR)/CfgTie::TieProto.$(MAN3EXT) \
+	lib/CfgTie/TiePh.pm \
+	$(INST_MAN3DIR)/CfgTie::TiePh.$(MAN3EXT) \
+	lib/CfgTie/TieRsrc.pm \
+	$(INST_MAN3DIR)/CfgTie::TieRsrc.$(MAN3EXT) \
+	lib/CfgTie/CfgArgs.pm \
+	$(INST_MAN3DIR)/CfgTie::CfgArgs.$(MAN3EXT) \
+	lib/CfgTie/TieGeneric.pm \
+	$(INST_MAN3DIR)/CfgTie::TieGeneric.$(MAN3EXT) \
+	lib/CfgTie/TieHost.pm \
+	$(INST_MAN3DIR)/CfgTie::TieHost.$(MAN3EXT) \
 	lib/CfgTie/TieUser.pm \
 	$(INST_MAN3DIR)/CfgTie::TieUser.$(MAN3EXT) \
 	lib/CfgTie/TieServ.pm \
 	$(INST_MAN3DIR)/CfgTie::TieServ.$(MAN3EXT) \
 	lib/CfgTie/TieAliases.pm \
 	$(INST_MAN3DIR)/CfgTie::TieAliases.$(MAN3EXT) \
-	lib/CfgTie/TieProto.pm \
-	$(INST_MAN3DIR)/CfgTie::TieProto.$(MAN3EXT) \
+	lib/CfgTie/TieMTab.pm \
+	$(INST_MAN3DIR)/CfgTie::TieMTab.$(MAN3EXT) \
 	lib/CfgTie/TieNamed.pm \
 	$(INST_MAN3DIR)/CfgTie::TieNamed.$(MAN3EXT) \
-	lib/CfgTie/TieShadow.pm \
-	$(INST_MAN3DIR)/CfgTie::TieShadow.$(MAN3EXT) \
 	lib/CfgTie/TieRCService.pm \
 	$(INST_MAN3DIR)/CfgTie::TieRCService.$(MAN3EXT) \
+	lib/CfgTie/TieShadow.pm \
+	$(INST_MAN3DIR)/CfgTie::TieShadow.$(MAN3EXT) \
 	lib/CfgTie/TieNet.pm \
 	$(INST_MAN3DIR)/CfgTie::TieNet.$(MAN3EXT) \
-	lib/CfgTie/TiePh.pm \
-	$(INST_MAN3DIR)/CfgTie::TiePh.$(MAN3EXT) \
 	lib/CfgTie/filever.pm \
-	$(INST_MAN3DIR)/CfgTie::filever.$(MAN3EXT) \
-	lib/CfgTie/CfgArgs.pm \
-	$(INST_MAN3DIR)/CfgTie::CfgArgs.$(MAN3EXT)
+	$(INST_MAN3DIR)/CfgTie::filever.$(MAN3EXT)
 
 # --- MakeMaker processPL section:
 
@@ -556,20 +526,24 @@ $(INST_SCRIPT)/.exists :: /usr/lib/perl5/i386-linux/5.00401/CORE/perl.h
 
 	-@$(CHMOD) 755 $(INST_SCRIPT)
 
-EXE_FILES = bin/CfgAliases bin/CfgNamed bin/CfgAliases,v
+EXE_FILES = bin/CfgAliases bin/CfgNamed bin/DNS-find-free bin/mail-validate
 
-all :: $(INST_SCRIPT)/CfgAliases $(INST_SCRIPT)/CfgAliases,v $(INST_SCRIPT)/CfgNamed
+all :: $(INST_SCRIPT)/mail-validate $(INST_SCRIPT)/DNS-find-free $(INST_SCRIPT)/CfgAliases $(INST_SCRIPT)/CfgNamed
 
 realclean ::
-	rm -f $(INST_SCRIPT)/CfgAliases $(INST_SCRIPT)/CfgAliases,v $(INST_SCRIPT)/CfgNamed
+	rm -f $(INST_SCRIPT)/mail-validate $(INST_SCRIPT)/DNS-find-free $(INST_SCRIPT)/CfgAliases $(INST_SCRIPT)/CfgNamed
+
+$(INST_SCRIPT)/mail-validate: bin/mail-validate Makefile $(INST_SCRIPT)/.exists
+	@rm -f $(INST_SCRIPT)/mail-validate
+	cp bin/mail-validate $(INST_SCRIPT)/mail-validate
+
+$(INST_SCRIPT)/DNS-find-free: bin/DNS-find-free Makefile $(INST_SCRIPT)/.exists
+	@rm -f $(INST_SCRIPT)/DNS-find-free
+	cp bin/DNS-find-free $(INST_SCRIPT)/DNS-find-free
 
 $(INST_SCRIPT)/CfgAliases: bin/CfgAliases Makefile $(INST_SCRIPT)/.exists
 	@rm -f $(INST_SCRIPT)/CfgAliases
 	cp bin/CfgAliases $(INST_SCRIPT)/CfgAliases
-
-$(INST_SCRIPT)/CfgAliases,v: bin/CfgAliases,v Makefile $(INST_SCRIPT)/.exists
-	@rm -f $(INST_SCRIPT)/CfgAliases,v
-	cp bin/CfgAliases,v $(INST_SCRIPT)/CfgAliases,v
 
 $(INST_SCRIPT)/CfgNamed: bin/CfgNamed Makefile $(INST_SCRIPT)/.exists
 	@rm -f $(INST_SCRIPT)/CfgNamed
@@ -595,7 +569,7 @@ clean ::
 # Delete temporary files (via clean) and also delete installed files
 realclean purge ::  clean
 	rm -rf $(INST_AUTODIR) $(INST_ARCHAUTODIR)
-	rm -f $(INST_LIB)/CfgTie/TieGroup.pm $(INST_LIB)/CfgTie/filever.pm,v $(INST_LIB)/CfgTie/Cfgfile.pm $(INST_LIB)/CfgTie/TieGroup.pm,v $(INST_LIB)/CfgTie/Cfgfile.pm,v $(INST_LIB)/CfgTie/makefile $(INST_LIB)/CfgTie/TieProto.pm $(INST_LIB)/CfgTie/TieProto.pm,v $(INST_LIB)/CfgTie/TiePh.pm $(INST_LIB)/CfgTie/TiePh.pm,v $(INST_LIB)/CfgTie/CfgArgs.pm $(INST_LIB)/CfgTie/CfgArgs.pm,v $(INST_LIB)/CfgTie/TieGeneric.pm $(INST_LIB)/CfgTie/TieHost.pm $(INST_LIB)/CfgTie/TieUser.pm $(INST_LIB)/CfgTie/TieGeneric.pm,v $(INST_LIB)/CfgTie/TieHost.pm,v $(INST_LIB)/CfgTie/TieServ.pm $(INST_LIB)/CfgTie/TieUser.pm,v $(INST_LIB)/CfgTie/TieAliases.pm $(INST_LIB)/CfgTie/TieServ.pm,v $(INST_LIB)/CfgTie/tmp $(INST_LIB)/CfgTie/TieAliases.pm,v $(INST_LIB)/CfgTie/TieNamed.pm $(INST_LIB)/CfgTie/TieRCService.pm $(INST_LIB)/CfgTie/TieShadow.pm $(INST_LIB)/CfgTie/TieNet.pm $(INST_LIB)/CfgTie/TieNamed.pm,v $(INST_LIB)/CfgTie/TieRCService.pm,v $(INST_LIB)/CfgTie/TieShadow.pm,v $(INST_LIB)/CfgTie/TieNet.pm,v $(INST_LIB)/CfgTie/filever.pm
+	rm -f $(INST_LIB)/CfgTie/TieGroup.pm $(INST_LIB)/CfgTie/Cfgfile.pm $(INST_LIB)/CfgTie/makefile $(INST_LIB)/CfgTie/TieProto.pm $(INST_LIB)/CfgTie/TiePh.pm $(INST_LIB)/CfgTie/TieRsrc.pm $(INST_LIB)/CfgTie/CfgArgs.pm $(INST_LIB)/CfgTie/TieGeneric.pm $(INST_LIB)/CfgTie/TieHost.pm $(INST_LIB)/CfgTie/TieUser.pm $(INST_LIB)/CfgTie/TieServ.pm $(INST_LIB)/CfgTie/TieAliases.pm $(INST_LIB)/CfgTie/TieMTab.pm $(INST_LIB)/CfgTie/TieNamed.pm $(INST_LIB)/CfgTie/TieRCService.pm $(INST_LIB)/CfgTie/TieShadow.pm $(INST_LIB)/CfgTie/TieNet.pm $(INST_LIB)/CfgTie/filever.pm
 	rm -rf Makefile Makefile.old
 
 
@@ -838,17 +812,18 @@ pm_to_blib: $(TO_INST_PM)
 # --- MakeMaker postamble section:
 
 #This assumes, of course, that you have these tools installed...
-CfgTie_toc.html: CfgTie.tex lib/CfgTie/TieRCService.pm lib/CfgTie/Cfgfile.pm lib/CfgTie/CfgArgs.pm lib/CfgTie/TieAliases.pm lib/CfgTie/TieGeneric.pm lib/CfgTie/TieGroup.pm lib/CfgTie/TieHost.pm lib/CfgTie/TieNamed.pm lib/CfgTie/TieNet.pm lib/CfgTie/TiePh.pm lib/CfgTie/TieProto.pm lib/CfgTie/TieServ.pm lib/CfgTie/TieShadow.pm lib/CfgTie/TieUser.pm Intro.tex
+CfgTie_toc.html: CfgTie.tex lib/CfgTie/TieRCService.pm lib/CfgTie/Cfgfile.pm lib/CfgTie/CfgArgs.pm lib/CfgTie/TieAliases.pm lib/CfgTie/TieGeneric.pm lib/CfgTie/TieGroup.pm lib/CfgTie/TieHost.pm lib/CfgTie/TieNamed.pm lib/CfgTie/TieNet.pm lib/CfgTie/TiePh.pm lib/CfgTie/TieProto.pm lib/CfgTie/TieRsrc.pm lib/CfgTie/TieServ.pm lib/CfgTie/TieShadow.pm lib/CfgTie/TieUser.pm Intro.tex
 	make all -Clib/CfgTie
 	make all -Cbin
-	prj2texi MANIFEST > CodeMenu.tex
+	make all -Ccgi
+	txh2texi . --output-file=CfgTie2.tex
 	texi2html -glossary -split_node -menu CfgTie.tex
 
 texi: CfgTie_toc.html 
 	../../tup.pl CfgTie
 
-tarball: ../CfgTie-0.2
-	 tar cv --gzip -C .. -f../CfgTie-0.2-`date +%Y%m%d`.tar.gz CfgTie-0.2 --exclude *,v --exclude blib -S
+tarball: ../CfgTie-0.3
+	 tar cv --gzip -C .. -f../CfgTie-0.3-`date +%Y%m%d`.tar.gz CfgTie-0.3 --exclude *,v --exclude blib --exclude *.txh -S
 
 
 

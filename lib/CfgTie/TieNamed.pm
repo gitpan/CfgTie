@@ -231,13 +231,15 @@ use CfgTie::Cfgfile;
 use CfgTie::TieRCService;
 use CfgTie::filever;
 @ISA=qw(CfgTie::Cfgfile);
-my $serv = CfgTie::TieRCService->new('named');
+my %servs;
+tie %servs, 'CfgTie::TieRCService';
+my $serv = $servs{'named'};
 1;
 
 sub cfg_end
 {
    #Tell the name server to restart
-   $serv->reload();
+   (tied $serv)->reload();
 }
 
 # This reads in a named boot file.
@@ -368,7 +370,7 @@ sub STORE
            #Basically
            my ($key2, @rest) = @{$val};
            $self->{Contents}->{$key2} = [@rest];
-           $self->{delegate}->Queue_Store("limit\s+$key2",[@rest]);
+           $self->{delegate}->Queue_Store("limit\\s+$key2",[@rest]);
         }
    elsif ($lkey eq 'primary')
         {
@@ -389,7 +391,7 @@ sub AUTOLOAD
    if ($AUTOLOAD eq 'start' || $AUTOLOAD eq 'stop' || $AUTOLOAD eq 'restart'||
        $AUTOLOAD eq 'reload'|| $AUTOLOAD eq 'status')
      {
-        return $serv->$AUTOLOAD(@_);
+        return (tied $serv)->$AUTOLOAD(@_);
      }
 
    #Pass the message along
@@ -613,6 +615,7 @@ sub HTML
 }
 
 package CfgTie::TieNamed_primary;
+@ISA=qw(CfgTie::Cfgfile);
 #A tie hash for a single primary file...
 
 my @days_per_month=(31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31);
@@ -886,6 +889,7 @@ sub FETCH
 {
    my ($self, $key)=@_;
 
+print "$key\n";
    #If it is about to fetch something that doesn't exist.... tie it!
    if ($self->{delegate}->EXISTS($key))
      {return $self->{delegate}->FETCH($key);}
@@ -1001,6 +1005,7 @@ sub STORE
 sub FETCH
 {
    my ($self,$key)=@_;
+print $key, "\n";
    $self->{Contents}->{$key};
 }
 

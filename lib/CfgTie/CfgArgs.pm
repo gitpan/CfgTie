@@ -4,6 +4,9 @@
 #PERL itself.                                                                   
 
 package CfgTie::CfgArgs;
+require Exporter;
+@ISA=qw(Exporter);
+@EXPORT_OK=qw(Fatal Err $Prg);
 
 =head1 NAME
 
@@ -15,9 +18,9 @@ This module is meant to help create useful configuration tools and utilities.
 
 =head1 DESCRIPTION
 
-A tool to allow many of your computers subsystems to be configured.  This
-parses commandline arguments.  It is provided to help create a standardized
-lexicon.
+A tool to allow many of your computer's subsystems to be configured.  This
+module parses commandline arguments.  It is provided to help create a
+standardized lexicon.
 
 =head2 Scope controls and settings
 
@@ -27,7 +30,7 @@ settings:
   --scope=session|application|user|group|system
 
 
-In addition, each of the specific parts can specified (instead of their
+In addition, each of the individual parts can specified (instead of their
 defaults):
 
 =over 1
@@ -48,7 +51,7 @@ This specifies the user name.
 
 =item C<--group >I<NAME>
 
-This specifies the group name
+This specifies the group name.
 
 =back
 
@@ -152,8 +155,7 @@ it would run, etc.
 
 =head2 Exit value
 
-If the operation is exists, the return value is nonzero if the thing does not
-exist, zero if it does.
+If the operation exists the return value is zero, otherwise it is nonzero.
 
 =head2 Return from parsing
 
@@ -290,3 +292,60 @@ sub do
 {
    GetOptions(shift, @GetoptLong_Rules, @_);
 }
+
+# --- Error handling ----------------------------------------------------------
+#Def of good error message
+# 1. Identifies the module generating the message (manufacturer, type, etc)
+# 2. Identifies the error type (a code number usually)
+# 3. Identifies the subsystems or relevant locus of a problem -
+# 4. Human description of the problem
+# 5. What will, should, or needs to happen
+
+my %Msgs;
+my $Lang='english';
+$Msgs{'english'} =
+  {
+     EXITING => "Exiting.",
+     GROUP_MISSING  => "Group was not specified",
+     USER_NONAME    => "Your user id does not have a name.",
+     USER_BAD_REAL  => "Real user id is root.  This is not allowed.",
+     USER_BAD_EFF   => "Effective user id is root.  This is not allowed, ".
+	               "using the real user id.",
+     TAINTED        => "\\1 is tainted.",
+     EMAIL_BAD      => "Item to add has invalid email address: \"\\1\"",
+     FILE_NEXIST    => "file \"\\1\" does not exist!",
+     FILE_EXISTS    => "file \"\\1\" exists, will not overwrite.",
+     FILE_CANTCREATE=> "Can not create file \"\\1\" for output.",
+  };
+my $ErrMsgs = $Msgs{$Lang};
+
+sub FmtEStr
+{
+   my ($E,$A)=@_;
+   my $Str= $ErrMsgs->{$E};
+   if (!defined $Str)
+     {warn "Can't look up error message for $E\n"; $Str=$E;}
+   
+   #Add in the users parameters
+   $Str=~ s/\\1/$A/g;
+   $Str;
+}
+
+$Prg='';
+sub Fatal
+{
+   my $Str=CfgTie::CfgArgs::FmtEStr(@_);
+
+   #Announce to the user, and die
+   die "$Prg: $Str\n";
+}
+
+sub Err
+{
+   my $Str=CfgTie::CfgArgs::FmtEStr(@_);
+
+   #Announce to the user
+   print STDERR "$Prg: $Str\n";
+}
+
+1;

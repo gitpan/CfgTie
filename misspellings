@@ -1,2 +1,4 @@
 #
-egrep -i priam lib/*/*.pm bin/*
+egrep -i priam lib/*/*.pm bin/* docs/*.tex
+egrep -i hawow lib/*/*.pm bin/* docs/*.tex
+egrep -i Cavaets lib/*/*.pm bin/* docs/*.tex

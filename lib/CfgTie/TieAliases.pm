@@ -24,7 +24,7 @@ Makes it easy to manage the mail aliases (F</etc/aliases>) table as a hash.
 
 =head1 DESCRIPTION
 
-This PERL module ties to the F</etc/aliases> file so that things can be
+This Perl module ties to the F</etc/aliases> file so that things can be
 updated on the fly.  When you tie the hash, you are allowed an optional
 parameter to specify what file to tie it to.
 
@@ -37,6 +37,21 @@ or
 or
 
    tie %mtie,'CfgTie::TieAliases',I<revision-control-object>
+
+=head2 Methods
+
+C<ImpGroups> will import the various groups from F</etc/group> using
+C<CfgTie::TieGroup>.  It allows an optional code reference to select which
+groups get imported.  This code is passed a reference to each group and needs
+to return nonzero if it is to be imported, or zero if it not to be imported.
+For example:
+
+   (tied  %mtie)->ImpGroups
+	{
+	   my $T=shift;
+	   if ($T->{'id} < 100) {return 0;}
+	   return 1;
+	}
 
 =head2 Format of the F</etc/aliases> file
 
@@ -53,19 +68,19 @@ comment, and ignored.
 =item I<text>C<:>
 
 The letters, digits, dashes, and underscores before a colon are treated as
-the name of an aliases.  The alias will be expanded to whatever is on the
+the name of an alias.  The alias will be expanded to whatever is on the
 line after the colon.  (Each of those is in turn expanded).
 
 =back
 
-=head1 Cavaets
+=head1 Caveats
 
 Not all changes to are immediately reflected to the specified file.  See the
 L<CfgTie::Cfgfile> module for more information
 
 =head1 See Also
 
-L<CfgTie::Cfgfile>, L<CfgTie::TieRCService>,
+L<CfgTie::Cfgfile>,    L<CfgTie::TieRCService>,
 L<CfgTie::TieGeneric>, L<CfgTie::TieGroup>, L<CfgTie::TieHost>,
 L<CfgTie::TieNamed>,   L<CfgTie::TieNet>, L<CfgTie::TiePh>,
 L<CfgTie::TieProto>,   L<CfgTie::TieServ>,  L<CfgTie::TieShadow>,
@@ -110,9 +125,8 @@ sub scan
 sub cfg_end
 {
    my $self = shift;
-#   my $self=shift;
    if (exists $self->{Path} && $self->{Path} eq '/etc/aliases')
-     {system "/usr/bin/newaliases";}
+     {CfgTie::filever::system("/usr/bin/newaliases");}
 #    else {print "Not a path for newaliases\n";}
 }
 
@@ -154,7 +168,7 @@ sub makerewrites
    return $Sub;
 }
 
-sub new {&TIEHASH(@_);}
+sub new {TIEHASH(@_);}
 sub TIEHASH
 {
    my $self =shift;
@@ -162,6 +176,30 @@ sub TIEHASH
    my $Ret = bless $Node, $self;
    $Ret->{delegate} = CfgTie::Cfgfile->new($Ret, @_);
    $Ret;
+}
+
+sub ImpGroups(&$)
+{
+   my ($CodeRef,$Ref)=@_;
+   #Create a list of group names that pass the selection criteria
+   #The code ref is passed a reference to the group information
+   my %groups;
+   use CfgTie::TieGroup;
+   tie %groups, 'CfgTie::TieGroup';
+
+   if (!defined $CodeRef)
+     {
+        foreach my $I (keys %groups)
+	 {$Ref->{$I}= $groups{$I}->{'members'};}
+     }
+    else
+     {
+        foreach my $I (keys %groups)
+          {
+	      if (!&$CodeRef($groups{$I})) {next;}
+	      $Ref->{$I}=$groups{$I}->{'members'};
+	  }
+     }
 }
 
 sub HTML

@@ -14,38 +14,38 @@ CfgTie::TieUser -- an associative array of user names and ids to information
 
 =head1 SYNOPSIS
 
-makes the user database available as a regular hash
+makes the user database available as a regular hash.
 
         tie %user,'CfgTie::TieUser'
         print "randym's full name: ", $user{'randym'}->{gcos}, "\n";
 
 =head1 DESCRIPTION
 
-This is a straight forward HASH tie that allows us to access the user database
+This is a straightforward hash tie that allows us to access the user database
 sanely.
 
 It cross ties with the groups packages and the mail packages
 
 =head2 Ties
 
-There are two ties available for programers:
+There are two ties available for programmers:
 
 =over 1
 
 =item C<tie %user,'CfgTie::TieUser'>
 
-C<$user{$name}> will return a HASH reference of the named user information
+C<$user{$name}> will return a hash reference of the named user information.
 
 =item C<tie %user_id,'CfgTie::TieUser_id'>
 
-C<$user_id{$id}> will return a HASH reference for the specified user.
+C<$user_id{$id}> will return a hash reference for the specified user.
 
 =back
 
 =head2 Structure of hash
 
 Any given user entry has the following information assoicated with it (the
-keys are case insensitive):
+keys are case-insensitive):
 
 =over 1
 
@@ -55,23 +55,22 @@ Login name
 
 =item C<GroupId>
 
+The principle group the user belongs to.
+
 =item C<Id>
 
 The user id number that they have been assigned.  It is possible for many
-different user names to given the same id.  However, changing the Id for
-the user (ie, setting it to a new one), has one of two effects.  If
+different user names to be given the same id.  However, changing the id for
+the user (i.e., setting it to a new one) has one of two effects.  If
 C<user'Chg_FS> is set 1, then all the files in the system owned by that id
 will changed to the new id in addition to changing the id in the system table.
 Otherwise, only the system table will be modified.
-
-
-=item C<Quota>
 
 =item C<Comment>
 
 =item C<Home>
 
-The users home folder
+The user's home folder
 
 =item C<LOGIN_Last>
 
@@ -82,23 +81,40 @@ array reference to data like:
 
 =item C<Shell>
 
-The users shell
+The user's shell
 
 =item C<AuthMethod>
 
-The authentication method if other than the default
+The authentication method if other than the default.  (Note: This can be set,
+but currently can't get fetched.)
 
 =item C<ExpireDate>
 
-The date the account expires on
+The date the account expires on.
+(Note: this can be set, but currently can't be fetched.)
 
 =item C<Inactive>
 
-The number of days after a password expires.s...
+The number of days after a password expires.
+(Note: this can be set, but currently can't be fetched.)
 
 =item C<Priority>
 
 The scheduling priority for that user.
+(Note: this requires that C<BSD::Resource> be installed.)
+
+=item C<Quota>
+
+=item C<RUsage>
+
+The process resource consumption by the user.
+Note: This requires that C<BSD::Resource> be installed.
+
+Returns a list reference of the form:
+
+   [$usertime, $systemtime, $maxrss,  $ixrss,   $idrss,  $isrss,  $minflt,
+    $majflt,   $nswap,      $inblock, $oublock, $msgsnd, $msgrcv, $nsignals,
+    $nvcsw, $nivcsw]
 
 =back
 
@@ -109,7 +125,7 @@ Plus two (probably) obsolete fields:
 
 =item C<Password>
 
-This is the encrypted password, but will probably be obsolete
+This is the encrypted password, but will probably be obsolete.
 
 =item C<GCOS>
 
@@ -117,14 +133,14 @@ I<General Electric Comprehensive Operating System> or
 I<General Comprehensive Operating System>
 field
 
-This is now the users full name under many Unix's, incl. LINUX.
+This is now the user's full name under many Unix's, incl. Linux.
 
 =back
 
 Each of these entries can be modified (even deleted), and they will be
-reflected into the overall system.  Additionally, the programmer can set any
-other associated key, but this information will only available to running
-PERL script.
+reflected in the overall system.  Additionally, the programmer can set any
+other associated key, but this information will only be available to the
+running Perl script.
 
 =head2 Configuration Variables
 
@@ -132,11 +148,11 @@ PERL script.
 
 =over 1
 
-=item C<&CfgTie::TieUser'status()>
+=item C<&CfgTie::TieUser'stat()>
 
-=item C<&CfgTie::TieUser_id'status()>
+=item C<&CfgTie::TieUser_id'stat()>
 
-Will return C<stat> information on the user database.
+Will return C<stat>-like statistics information on the user database.
 
 =back
 
@@ -156,6 +172,19 @@ To do this you need only include code like the following:
        </td></tr><lt></table>C<\n>";
    }
 
+If, instead, you wanted to add your own keys to the user records, 
+C<CfgTie::TieUser::add_scalar(>I<$Name>,I<$Package>C<)>
+Lets you add scalar keys to user records.  The I<Name> specifies the key name
+to be used; it will be made case-insensitve.  The I<Package> specifies the name
+of the package to be used when tie'ing the key to a value.  (The C<TIESCALAR>
+is passed the user id as a parameter).
+
+C<CfgTie::TieUser::add_hash(>I<$Name>,I<$Package>C<)>
+Lets you add hash keys to user records.  The I<Name> specifies the key name
+to be used; it will be made case insensitve.  The I<Package> specifies the name
+of the package to be used when tie'ing the key to a value.  (The C<TIEHASH>
+is passed the user id as a parameter).
+
 =head2 Miscellaneous
 
 C<$CfgTie::TieUser_rec'usermod> contains the path to the program F<usermod>.
@@ -171,12 +200,13 @@ Not all keys are supported on all systems.
 
 This may transparently use a shadow tie in the future.
 
+=head2 When the changes are reflected to /etc/passwd
+
 =head1 Files
 
 F</etc/passwd>
 F</etc/group>
 F</etc/shadow>
-
 
 =head1 See Also
 
@@ -193,9 +223,9 @@ L<usermod(8)>,
 L<useradd(8)>,
 L<userdel(8)>
 
-=head1 Cavaets
+=head1 Caveats
 
-The current version does cache some user information
+The current version does cache some user information.
 
 =head1 Author
 
@@ -206,7 +236,7 @@ Randall Maas (L<randym@acm.org>)
 my $Chg_FS = 1; #By default we want to update the file system when the user
 # Id changes
 
-sub status
+sub stat($)
 {
   # the information for the /etc/passwd file
   stat '/etc/passwd';
@@ -252,7 +282,7 @@ sub EXISTS
    my @x = getpwnam $name;
    if (! scalar @x) {return 0;}
 
-   $CfgTie::TieUser_rec'by_name{$lname} = CfgTie::TieUser_rec->new(@x);
+   tie %{$CfgTie::TieUser_rec'by_name{lc($x[0])}}, 'CfgTie::TieUser_rec',@x;
    return 1;
 }
 
@@ -265,7 +295,7 @@ sub FETCH
    my $lname = lc($name);
 
    #check out our cache first
-   if (&EXISTS($self,$lname))
+   if (EXISTS($self,$lname))
      {return $CfgTie::TieUser_rec'by_name{$lname};}
 }
 
@@ -283,11 +313,47 @@ sub DELETE
    my $name = shift;
 
    #Basically delete the user now.
-   system "$CfgTie::TieUser_rec'userdel $name";
+   CfgTie::filver::system("$CfgTie::TieUser_rec'userdel $name");
 
    #Remove it from our cache
    if (exists $CfgTie::TieUser_rec'by_name{$name})
      {delete $CfgTie::TieUser_rec'by_name{$name};}
+}
+
+sub HTML($$)
+{
+   my ($self,$CodeRef)=@_;
+   my %A;
+   for (my $I=FIRSTKEY($self); $I; $I=NEXTKEY($self,$I))
+    {
+       my $U=FETCH($self,$I);
+       #See if the caller wants us to pass
+       if (defined $CodeRef && !&$CodeRef($U)) {next;}
+       $A{$I} = CfgTie::Cfgfile::trx(
+		"<a href=\"user/$I\">$I</a>",
+		$U->{'gcos'},
+		"<a href=\"mailto:$I\">$I</a>"
+		);
+    }
+   my $Us;
+   foreach my $I (sort keys %A) {$Us.=$A{$I};}
+   CfgTie::Cfgfile::table('Users',
+	"<th class=\"cfgattr\">login</th><th class=\"cfgattr\">Full Name</th>".
+	 "<th class=\"cfgattr\">mailto:</th></tr>\n".$Us, 3);
+}
+
+sub add_scalar($$)
+{
+   my ($name,$package) =@_;
+   $name=lc($name);
+   $CfgTie::TieUser_rec::SDelegates->{$name}=$package;
+}
+
+sub add_hash($$)
+{
+   my ($name,$package) =@_;
+   $name=lc($name);
+   $CfgTie::TieUser_rec::HDelegates->{$name}=$package;
 }
 
 package CfgTie::TieUser_id;
@@ -338,7 +404,7 @@ sub EXISTS
    my @x = getpwuid $id;
    if (! scalar @x) {return 0;}
 
-   $CfgTie::TieUser_rec'by_name{$x[0]} = CfgTie::TieUser_rec->new(@x);
+   tie %{$CfgTie::TieUser_rec'by_name{lc($x[0])}}, 'CfgTie::TieUser_rec',@x;
    $CfgTie::TieUser_rec'by_id{$id} = $CfgTie::TieUser_rec'by_name{$x[0]};
    return 1;
 }
@@ -348,7 +414,7 @@ sub FETCH
    my ($self,$id) = @_;
 
    #check out our cache first
-   if (&EXISTS($self,$id)) {return $CfgTie::TieUser_rec'by_id{$id};}
+   if (EXISTS($self,$id)) {return $CfgTie::TieUser_rec'by_id{$id};}
 }
 
 #Bug creating users is not supported yet.
@@ -366,13 +432,14 @@ sub DELETE
    if (!exists $CfgTie::TieUser_rec'by_id{$id})
      {
         #Try to look up the user id
-        &FETCH($self,$id);
+        FETCH($self,$id);
      }
       
    if (exists $CfgTie::TieUser_rec'by_id{$id})
      {
         #Basically delete the user now.
-        system "$CfgTie::TieUser_rec'userdel $CfgTie::TieUser_rec'by_id{$id}->{Name}";
+        CfgTie::filever::system
+	 ("$CfgTie::TieUser_rec'userdel $CfgTie::TieUser_rec'by_id{$id}->{Name}");
 
         #Remove it from out cache
         delete $CfgTie::TieUser_rec'by_id{$id};
@@ -388,6 +455,14 @@ package CfgTie::TieUser_rec;
 #Two hashes are used for look up
 # $by_name{$name}
 # $by_id{$id}
+
+#Delegate keys
+# This are looked up by a delegate system that we basically add on
+my $HDelegates={};
+my $SDelegates={};
+
+#Extended keys
+my $EKeys = {'last'=>[],login_last=>[]};
 
 sub new {&TIEHASH(@_);}
 
@@ -407,6 +482,12 @@ sub TIEHASH
 
    if (defined $Name)    {$Node->{name}=$Name;}
 
+   #Add in the delegates
+   foreach my $I (keys %{$HDelegates})
+   {tie %{$Node->{$I}}, $HDelegates->{$I}, $Node->{id};}
+   foreach my $I (keys %{$SDelegates})
+   {tie $Node->{$I}, $SDelegates->{$I}, $Node->{id};}
+
    return bless $Node, $self;
 }
 
@@ -414,13 +495,23 @@ sub FIRSTKEY
 {
    my $self = shift;
    my $a = keys %{$self};
-   return scalar each %{$self};
+   NEXTKEY($self,undef);
 }
 
-sub NEXTKEY
+sub NEXTKEY ($$)
 {
-   my $self = shift;
-   return scalar each %{$self};
+   my ($self,$prev) = @_;
+   my $a = scalar each %{$self};
+   if ($a) {return $a;}
+
+   #Should also return something from the extended keys if not already set.
+   if (!exists $EKeys->{$prev}) {my $a = keys %{$EKeys};}
+   while ($a = scalar each %{$EKeys})
+    {
+       if (exists $self->{$a}) {next;}
+       return $a;
+    }
+   return $a;
 }
 
 #Modified from PERL Cookbook:
@@ -429,13 +520,6 @@ sub lastlog_FETCH($)
 {
    use User::pwent;
    use IO::Seekable qw(SEEK_SET);
-
-   #SECURITY NOTE:
-   #Change our real user id and group id to be whatever out user
-   #id and group id really are
-   my ($UID_save, $GID_save);
-   ($UID_save,$>)=($>,$<);
-   ($GID_save,$))=($(,$();
 
    my $LASTLOG=$CfgTie::Cfgfile'FNum++;
    if (!open(LASTLOG, "</var/log/lastlog")) {return;}
@@ -453,12 +537,7 @@ sub lastlog_FETCH($)
      }
 
   ret_from_here:
-
    close LASTLOG;
-   #SECURITY NOTE:
-   #Restore real user id and group id to whatever they were before
-   ($>,$))=($UID_save,$GID_save);
-
    $R;
 }
 
@@ -492,6 +571,13 @@ sub EXISTS
    my ($self,$key) = @_;
    my $lkey=lc($key);
 
+   #first, check to see if it is a forbidden key
+   if ($lkey eq 'delegate') {return 0;}
+
+   #Next, check the delegates
+   if (exists $self->{delegate}->{$lkey}) {return 1;}
+
+   #otherwise check the rest
       if ($lkey eq 'login_last' && !exists $self->{'login_last'})
         {
            my $R = lastlog_FETCH($self->{name});
@@ -515,16 +601,14 @@ sub EXISTS
 
 sub FETCH
 {
-   my $self = shift;
-   my $key = shift;
+   my ($self,$key) = @_;
    my $lkey = lc($key);
 
-   if ($lkey eq 'priority')
-     {
-        #Get the priority setting from the system
-        return getpriority PRIO_USER,$self->{Node}->{Id};
-     }
-   elsif ($lkey eq 'last' && !exists $self->{$lkey}) {&EXISTS($self,$lkey);}
+   #Check the delegated stuff
+   if (exists $self->{delegate}->{$lkey})
+     {return $self->{delegate}->{$lkey}->FETCH($key);}
+
+   if (!exists $self->{$lkey}) {EXISTS($self,$lkey);}
 
    if (exists $self->{$lkey}) {return $self->{$lkey};}
 }
@@ -557,6 +641,10 @@ sub STORE
    my ($self,$key,$val) = @_;
    my $lkey = lc($key);
 
+   #Check the delegated stuff
+   if (exists $self->{delegate}->{$lkey})
+     {return $self->{delegate}->{$lkey}->STORE($key,$val);}
+
    if ($lkey eq 'groups')
      {
         #Handle the groups thing...
@@ -564,12 +652,7 @@ sub STORE
         #$val is a list reference....
         my ($i,@g) = @{$val};
 
-        system "$usermod $self->{name} -g $i -G ". join(',', @g);
-     }
-   elsif ($lkey eq 'priority')
-     {
-        #Pass the priority setting onto the system
-        setpriority(PRIO_USER,$self->{id},$val);
+        CfgTie::filever::system("$usermod $self->{name} -g $i -G ". join(',', @g));
      }
    elsif (exists $usermod_opt->{$lkey})
      {
@@ -595,8 +678,8 @@ sub STORE
         if (!defined $X) {$X='';}
 
         #Change the system tables
-        system "$usermod ".$usermod_opt->{$lkey}." $val $X ".$self->{name}.
-                "\n";
+        CfgTie::filever::system("$usermod ".$usermod_opt->{$lkey}." $val $X ".
+			$self->{name}."\n");
         #If bad things should throw exception
 
         if ($FSUp) {chown $val,-1, @FSet;}
@@ -618,12 +701,13 @@ sub DELETE
 
       if ($lkey eq 'authmethod')
         {
-           system "$usermod -A DEFAULT ".$self->{name};
+           CfgTie::filever::system("$usermod -A DEFAULT ".$self->{name});
         }
    elsif (exists $usermod_opt->{$lkey})
         {
            #This is something for user mod!
-           system "$usermod ".$usermod_opt->{$lkey}." ".$self->{name};
+           CfgTie::filever::system("$usermod ".$usermod_opt->{$lkey}." ".
+		$self->{name});
         }
    else
         {
@@ -631,6 +715,8 @@ sub DELETE
            delete $self->{$lkey};
         }
 }
+
+sub trx {CfgTie::Cfgfile::trx(@_);}
 
 sub HTML($)
 {
@@ -646,18 +732,149 @@ sub HTML($)
    delete $Keys2{groupid};
    delete $Keys2{password};
    my ($G) = getgrgid($self->{groupid});
+   my $A='';
+   foreach my $I (sort keys %Keys2) {$A.=trx($I,$self->{$I});}
 
-   "<h1>".$self->{gcos}."</h1>\n".
-   "<table border=0>".
-     "<tr><th align=right>Full Name:</th><td>".$self->{gcos}."</td></tr>".
-     "<tr><th align=right>login:</th><td>".$self->{name}."</td></tr>".
-     "<tr><th align=right>Id:</th><td>".$self->{id}."</td></tr>".
-     "<tr><th align=right>Group:</th><td><a href=\"/group/$G\">".$G."</a> (".
-	$self->{groupid}.")</td></tr>".
-     "<tr><th align=right>".
-   
-    join("</td></tr>\n<tr><th align=right>",
-           map {$_."</th><td>".$self->{$_}}
-                (sort keys %Keys2)).
-   "</td></tr></table>\n";
+   CfgTie::Cfgfile::table($self->{gcos},
+     trx("Full Name:",  $self->{gcos}).
+     trx("Login (UID):",$self->{name}." (".$self->{id}.")").
+     trx("Group (GID):","<a href=\"group/$G\">".$G."</a> (".
+	$self->{groupid}.")").$A);
 }
+
+## --- Support for optional user prioritization --------------------------------
+package CfgTie::TieUser_priority;
+if (eval("use BSD::Resource;"))
+  {
+     #Add the BSD stuff in
+     $CfgTie::TieUser_rec::SDelegate{'priority'}='CfgTie::TieUser_priority';
+     $CfgTie::TieUser_rec::SDelegate{'rusage'}='CfgTie::TieUser_rusage';
+  }
+      
+sub TIESCALAR
+{return bless {id=>$_[1]}, $_[0];}
+
+sub FETCH
+{
+   #Get the priority setting from the system
+   getpriority(PRIO_USER,$_[0]->{id});
+}
+
+sub STORE
+{
+   my ($self,$val)=@_;
+
+   #Pass the priority setting onto the system
+   setpriority(PRIO_USER,$self->{id},$val);
+}
+
+## --- Support for optional user resources -------------------------------------
+package CfgTie::TieUser_rusage;
+sub TIEHASH
+{return bless {id=>$_[1]}, $_[0];}
+
+#Get the consumption data from the system
+sub FETCH { [getrusage($_[0]->{id})]; }
+
+## --- Support for optional Quotas --------------------------------------------
+package CfgTie::TieUser_quota;
+#This part attempts to tie in the quota package.  It is not guaranteed to
+#succeed.  Quota from CPAN is recommended because of its completenes of API
+#and broad range of platforms supported.
+
+if (eval("use Quota;"))
+  {
+     #Add the quota stuff in
+     $CfgTie::TieUser_rec::HDelegate{'usage'}='CfgTie::TieUser_quota_usage';
+     $CfgTie::TieUser_rec::HDelegate{'limits'}='CfgTie::TieUser_quota_limits';
+     $CfgTie::TieUser_rec::HDelegate{'timeleft'}='CfgTie::TieUser_quota_timeleft';
+    }
+
+my $DB={usage=>{},timeleft=>{},limits=>{}};
+1;
+
+sub Query($$)
+{
+   #A wrapper around the Quota::query routine... converts into our internal
+   #usage form
+
+   my ($uid,$dev) = @_;
+
+   #Get the information
+   my ($Block_Curr, $Block_Soft, $Block_Hard, $Block_TimeLeft,
+       $INode_Curr, $INode_Soft, $INode_Hard, $INode_TimeLeft) =
+	 Quota::query($dev,$uid);
+
+
+   #Now store it in a form we can use
+   $DB->{usage}->   {$uid}->{$dev} =[$Block_Curr,    $INode_Curr];
+   $DB->{timeleft}->{$uid}->{$dev} =[$Block_TimeLeft,$INode_TimeLeft];
+   $DB->{limits}->  {$uid}->{$dev} =[$Block_Soft,$Block_Hard,$INode_Soft,$INode_Hard];
+}
+
+sub Exists ($$$)
+{
+   my($self,$key,$path) = @_;
+
+   #Convert the path into q form that can be used in a query
+   #(The representation will vary with each system)
+   my $dev = Query::getqcarg($key);
+
+   if (!exists $DB->{$key}->{$self->{uid}}->{$dev})
+      {Query($self->{uid},$dev);}
+   
+   return exists $DB->{$key}->{$self->{uid}}->{$dev};
+}
+
+sub Fetch ($$$)
+{
+   my($self,$key,$path) = @_;
+
+   #Convert the path into q form that can be used in a query
+   #(The representation will vary with each system)
+   my $dev = Query::getqcarg($key);
+
+   if (!exists $DB->{$key}->{$self->{uid}}->{$dev})
+      {Query($self->{uid},$dev);}
+   
+
+   if (exists $DB->{$key} && exists $DB->{$key}->{$self->{uid}}->{$dev})
+   {
+       return $DB->{$key}->{$self->{uid}}->{$dev};
+   }
+   undef;
+}
+
+package CfgTie::TieUser_quota_limits;
+sub new(@_)     {TIEHASH(@_);}
+sub TIEHASH     {return bless {uid=>$_[1]}, $_[0];}
+sub EXISTS ($$) {CfgTie::TieUser_quota::Exists($_[0],'limits',$_[1]);}
+sub FETCH ($$)  {CfgTie::TieUser_quota::Fetch($_[0],'limits',$_[1]);}
+
+sub STORE ($$)
+{
+   my ($self,$key,$val)=@_;
+
+   #Convert the path into q form that can be used in a query
+   #(The representation will vary with each system)
+   #The key is the path
+   my $dev = Query::getqcarg($key);
+  
+   #clear out the keys
+   delete $limits{$self->{uid}};
+
+   Quota::setqlim($dev, $self->{uid}, @{$val});
+}
+
+package CfgTie::TieUser_quota_usage;
+sub new(@_)     {TIEHASH(@_);}
+sub TIEHASH     {return bless {uid=>$_[1]}, $_[0];}
+sub EXISTS ($$) {CfgTie::TieUser_quota::Exists($_[0],'usage',$_[1]);}
+sub FETCH ($$)  {CfgTie::TieUser_quota::Fetch ($_[0],'usage',$_[1]);}
+
+package CfgTie::TieUser_quota_timeleft;
+sub new(@_)     {TIEHASH(@_);}
+sub TIEHASH     {return bless {uid=>$_[1]}, $_[0];}
+sub EXISTS ($$) {CfgTie::TieUser_quota::Exists($_[0],'timeleft',$_[1]);}
+sub FETCH ($$)  {CfgTie::TieUser_quota::Fetch ($_[0],'timeleft',$_[1]);}
+

@@ -4,6 +4,7 @@
 #PERL itself.
 
 package CfgTie::TieServ;
+use CfgTie::Cfgfile;
 
 =head1 NAME
 
@@ -83,6 +84,8 @@ Randall Maas (L<randym@acm.org>)
 
 =cut
 
+my (%by_name,%by_port);
+
 sub TIEHASH
 {
    my $self = shift;
@@ -94,35 +97,83 @@ sub FIRSTKEY
 {
    my $self = shift;
 
+   #See if it has already been cached
+   if (exists $self->{' allscan'})
+     {
+	my $a = keys %by_name;
+	$a = scalar each %by_name;
+	if ($a ne ' allscan') {return $a;}
+	return scalar each %by_name;
+     }
+
    #Rewind outselves to the beginning.
    setservent 1;
 
-   &NEXTKEY($self);
+   NEXTKEY($self);
 }
 
 sub NEXTKEY
 {
    my $self = shift;
 
+   #See if it has already been cached
+   if (exists $self->{' allscan'})
+     {
+	my $a = scalar each %by_name;
+	if ($a ne ' allscan') {return $a;}
+	return scalar each %by_name;
+     }
+
+   #Use the API
+
    #Get the next serv id in the database.
    # Get the information from the system and store it for later
    my @x = getservent;
-   if (! scalar @x) {return;}
+   if (! scalar @x)
+     {
+	 $self->{' allscan'}=1; 
+       return;
+     }
 
-   &CfgTie::TieServ_rec'TIEHASH(0,@x);
+   tie %{$by_name{$x[0]}}, 'CfgTie::TieServ_rec', @x;
+   $by_port{$x[2]}=$by_name{$x[0]};
    return $x[0]; #Corresponds to the name
+}
+
+sub HTML
+{
+   my $self=shift;
+
+   my %A;
+   for(my $I = FIRSTKEY($self); $I; $I = NEXTKEY($self))
+   {
+      my $B= CfgTie::Cfgfile::td($by_name{$I}->{port}).
+     CfgTie::Cfgfile::td($by_name{$I}->{protocol});
+       foreach my $J ($I, @{$by_name{$I}->{aliases}})
+        {
+	   $A{$J} = "<tr>".
+	      CfgTie::Cfgfile::th("<a href=\"net/service/$I\">$J</a>").$B."</tr>\n";
+       }
+   }
+
+   my $R="<tr><th class=\"cfgattr\">Name</th><th class=\"cfgattr\">Port</th>".
+       "<th class=\"cfgattr\">Protocol</th></tr>\n";
+   foreach my $K (sort {lc($a) cmp lc($b)} keys %A) {$R .= $A{$K};}
+   CfgTie::Cfgfile::table("Network services",$R,3);
 }
 
 sub EXISTS
 {
    my ($self,$name) = shift;
-   if (exists $CfgTie::TieServ_rec'by_name{$name}) {return 1;}
+   if (exists $by_name{$name}) {return 1;}
 
    # Get the information from the system and store it for later
    my @x = getservbyname $name, AF_INET;
    if (! scalar @x) {return 0;}
 
-   &CfgTie::TieServ_rec'TIEHASH(0,@x);
+
+   tie %{$by_name{$x[0]}}, 'CfgTie::TieServ_rec', @x;
+   $by_port{$x[2]}=$by_name{$x[0]};
    return 1;
 }
 
@@ -131,8 +182,7 @@ sub FETCH
    my ($self, $name) = @_;
 
    #check out our cache first
-   if (exists $CfgTie::TieServ_rec'by_name{$name})
-    {return $CfgTie::TieServ_rec'by_name{$name};}
+   if (exists $by_name{$name}) {return $by_name{$name};}
 
    my %X;
    tie %X, 'CfgTie::TieServ_rec', getservbyname($name, AF_INET);
@@ -155,29 +205,78 @@ sub FIRSTKEY
 {
    my $self = shift;
 
+   #See if it has already been cached
+   if (exists $self->{' allscan'})
+     {
+	my $a = keys %CfgTie::TieServ::by_port;
+	$a = scalar each %CfgTie::TieServ::by_port;
+	if ($a ne ' allscan') {return $a;}
+	return scalar each %CfgTie::TieServ::by_port;
+     }
+
    #Rewind outselves to the beginning.
    setservent 1;
 
-   &NEXTKEY($self);
+   NEXTKEY($self);
 }
 
 sub NEXTKEY
 {
    my $self = shift;
 
+   #See if it has already been cached
+   if (exists $self->{' allscan'})
+     {
+	my $a = scalar each %CfgTie::TieServ::by_port;
+	if ($a ne ' allscan') {return $a;}
+	return scalar each %CfgTie::TieServ::by_port;
+     }
+
+   #Use the API
+
    #Get the next serv id in the database.
    # Get the information from the system and store it for later
    my @x = getservent;
-   if (! scalar @x) {return;}
+   if (! scalar @x)
+     {
+	 $self->{' allscan'}=1; 
+       return;
+     }
 
-   &CfgTie::TieServ_rec'TIEHASH(0,@x);
-   return $x[5]; #Corresponds to the id
+   tie %{$CfgTie::TieServ::by_name{$x[0]}}, 'CfgTie::TieServ_rec', @x;
+   $CfgTie::TieServ::by_port{$x[2]}=$CfgTie::TieServ::by_name{$x[0]};
+   return $x[2]; #Corresponds to the name
 }
+
+sub HTML
+{
+   my $self=shift;
+
+   my %A;
+   for(my $I = FIRSTKEY($self); $I; $I = NEXTKEY($self))
+   {
+       my $S=$CfgTie::TieServ::by_port{$I};
+      my $B=CfgTie::Cfgfile::td($I);
+      my $C=CfgTie::Cfgfile::td($S->{protocol});
+      $A{$I} = "<tr>".$B.
+	CfgTie::Cfgfile::td("<a href=\"net/serv/".
+			    $S->{name}."\">".$S->{name}."</a>, ".
+	       join(', ', @{$S->{aliases}})).
+		$C.
+	    "</tr>\n";
+   }
+
+   my $R="<tr><th class=\"cfgattr\">Port</th><th class=\"cfgattr\">Names</th>".
+       "<th class=\"cfgattr\">Protocol</th></tr>\n";
+   foreach my $K (sort {$a <=> $b} keys %A) {$R .= $A{$K};}
+   CfgTie::Cfgfile::table("Network services",$R,3);
+}
+
 
 sub EXISTS
 {
    my ($self,$port) = shift;
-   if (exists $CfgTie::TieServ_rec'by_port{$port}) {return 1;}
+   if (exists $CfgTie::TieServ::by_port{$port}) {return 1;}
 
    # Get the information from the system and store it for later
    my @x = getservbyport $port, AF_INET;
@@ -192,8 +291,8 @@ sub FETCH
    my ($self,$port) = @_;
 
    #check out our cache first
-   if (exists $CfgTie::TieServ_rec'by_port{$port})
-    {return $CfgTie::TieServ_rec'by_port{$port};}
+   if (exists $CfgTie::TieServ::by_port{$port})
+    {return $CfgTie::TieServ::by_port{$port};}
 
    my %X;
    tie %X, 'CfgTie::TieServ_rec', getservbyport($port, AF_INET);
@@ -206,10 +305,6 @@ package CfgTie::TieServ_rec;
 # A package used by both CfgTie::TieServ_port and CfgTie::TieServ to retain
 # record information about a service port.  This is the only way to access
 # servmod.
-
-#Two hashes are used for look up
-# $by_name{$name}
-# $by_port{$addr}
 
 sub TIEHASH
 {
@@ -226,18 +321,29 @@ sub TIEHASH
 #    else  create it
 
    my $Aliases;
-   $Node->{Name} =$Name;
-   ($Aliases, $Node->{Port}, $Node->{Protocol}) = @_;
-   $Node->{Aliases} = [split ',',$Aliases];
+   $Node->{name} =$Name;
+   ($Aliases, $Node->{port}, $Node->{protocol}) = @_;
+   $Node->{aliases} = [split /[\s,]+/,$Aliases];
 
    #Cross reference the names
    my $I;
-   foreach $I ($Name, $Node->{Aliases})
-    {$by_name{$I} = $Node;}
-
-   $by_port{$Node->{Port}} = $Node;
+   foreach $I ($Name, $Node->{aliases})
+    {$CfgTie::TieServ::by_name{$I} = $Node;}
 
    return bless $Node, $self;
+}
+
+sub HTML
+{
+   my $self=shift;
+   CfgTie::Cfgfile::table
+       (
+	$self->{name},
+	CfgTie::Cfgfile::trx("Name:",$self->{name}).
+	CfgTie::Cfgfile::trx("Port:",$self->{port}).
+	CfgTie::Cfgfile::trx("Protocol:",$self->{protocol}).
+	CfgTie::Cfgfile::trx("Aliases:",join(', ',@{$self->{aliases}})),2
+	);
 }
 
 sub FIRSTKEY
@@ -261,8 +367,8 @@ sub EXISTS
 
 sub FETCH
 {
-   my $self = shift;
-   my $key = shift;
+   my ($self,$key) = @_;
+   $key = lc($key);
 
    if (exists $self{$key}) {return $self{$key};}
 }
@@ -272,8 +378,8 @@ sub STORE
    # Changes a setting for the specified serv... we basically call servmod
    my ($self,$key,$val) = @_;
 
-        #Extra setting that will be lost... 8(
-        $self{$key}=$val;
+   #Extra setting that will be lost... 8(
+   $self{$key}=$val;
 }
 
 sub DELETE
@@ -281,7 +387,7 @@ sub DELETE
    #Deletes a serv setting
    my ($self, $key) = @_;
 
-           #Just remove our local copy
-           delete $self{$key};
+   #Just remove our local copy
+   delete $self{$key};
 }
 1;

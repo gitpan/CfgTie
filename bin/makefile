@@ -2,10 +2,13 @@ include ../makefile.inc
 
 install:
 
-all: CfgAliases.tex CfgNamed.tex
+all: CfgAliases.txh CfgNamed.txh mail-validate.txh
 
-CfgAliases.tex: CfgAliases
-	pod2texinfo CfgAliases
+mail-validate.txh: mail-validate 
+	pod2txh $* 
 
-CfgNamed.tex: CfgNamed
-	pod2texinfo CfgNamed
+CfgAliases.txh: CfgAliases
+	pod2txh CfgAliases
+
+CfgNamed.txh: CfgNamed
+	pod2txh CfgNamed

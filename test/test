@@ -37,12 +37,13 @@ fi
 
 #Test 4: A test to see if it can successfully add me (randym) to a single group
 cp aliases.start aliases
+perl dojoin.pl <aliases >aliases.join1
 CfgAliases --file aliases --join --group=gw
 if diff -q aliases aliases.join1; then
 	echo test4: --join: pass
 else
 	echo test4: --join: fail
-	rm aliases aliases~?
+	rm aliases aliases~? aliases.join1
 	exit -1;
 fi
 

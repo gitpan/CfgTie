@@ -100,7 +100,8 @@ sub cfg_end
    my $Path='./';
    $_ = $self->{Path};
    if (/^(.*\/)[^\/]$/) {$Path = $1;}
-   system('cd '.$Path.'db;credb 10240 prod;maked prod <'.$self->{Path}.
+   CfgTie::Cfgfile::system('cd '.$Path.'db;credb 10240 prod;maked prod <'.
+	  $self->{Path}.
           ';makei prod;build -s prod');
 }
 

@@ -17,23 +17,23 @@ CfgTie::TieProto, CfgTie::TieProto_num -- Ties the protocol number file to a
 
 =head1 DESCRIPTION
 
-This is a straight forward HASH tie that allows us to access the protocol
+This is a straightforward hash tie that allows us to access the protocol
 number database sanely.
 
 =head2 Ties
 
-There are two ties available for programers:
+There are two ties available for programmers:
 
 =over 1
 
 =item C<tie %proto,'CfgTie::TieProto'>
 
-C<$proto{$name}> will return a HASH reference of the named protocol
+C<$proto{$name}> will return a hash reference of the named protocol
 information
 
 =item C<tie %proto_num,'CfgTie::TieProto_num'>
 
-C<$proto_num{$num}> will return a HASH reference for the specified protocol
+C<$proto_num{$num}> will return a hash reference for the specified protocol
 number.
 
 =back
@@ -58,9 +58,8 @@ The protocol number
 
 =back
 
-Additionally, the programmer can set any
-other associated key, but this information will only available to running
-PERL script.
+Additionally, the programmer can set any other associated key, but this
+information will only be available to the running Perl script.
 
 =head1 See Also
 
@@ -69,7 +68,7 @@ L<CfgTie::TieGroup>,   L<CfgTie::TieHost>, L<CfgTie::TieNamed>,
 L<CfgTie::TieNet>,     L<CfgTie::TiePh>,   L<CfgTie::TieProto>,
 L<CfgTie::TieServ>,    L<CfgTie::TieShadow>,  L<CfgTie::TieUser>
 
-=head1 Cavaets
+=head1 Caveats
 
 The current version does cache some proto information.
 

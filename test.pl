@@ -9,15 +9,19 @@
 # (It may become useful if the test is moved to ./t subdirectory.)
 
 $loaded=1;
-BEGIN { $| = 1; print "1..20\n"; }
+BEGIN { $| = 1; print "1..22\n"; }
 END {print "not ok $loaded\n" if $loaded;}
 require Tie::Hash;
 print "ok $loaded\n"; $loaded++;
+use CfgTie::Cfgfile;
+print "ok $loaded\n"; $loaded++;
 use CfgTie::TieAliases;
 print "ok $loaded\n"; $loaded++;
-use CfgTie::TieNamed;
+use CfgTie::filever;
 print "ok $loaded\n"; $loaded++;
-use CfgTie::Cfgfile;
+use CfgTie::TieRCService;
+print "ok $loaded\n"; $loaded++;
+use CfgTie::TieNamed;
 print "ok $loaded\n"; $loaded++;
 use CfgTie::CfgArgs;
 print "ok $loaded\n"; $loaded++;
@@ -35,11 +39,11 @@ use CfgTie::TiePh;
 print "ok $loaded\n"; $loaded++;
 use CfgTie::TieProto;
 print "ok $loaded\n"; $loaded++;
+use CfgTie::TieRsrc;
+print "ok $loaded\n"; $loaded++;
 use CfgTie::TieServ;
 print "ok $loaded\n"; $loaded++;
 use CfgTie::TieShadow;
-print "ok $loaded\n"; $loaded++;
-use CfgTie::filever;
 print "ok $loaded\n"; $loaded++;
 
 ######################### End of black magic.

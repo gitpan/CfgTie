@@ -1,4 +1,4 @@
-.SUFFIXES: .c .s .asm .a .o .exe .dxe .svf .xsv .tex .txh .txt .html .bin .inf .pl .p .pm .cgi .prj
+.SUFFIXES: .c .s .asm .a .o .exe .dxe .svf .xsv .tex .txh .txt .html .bin .inf .info .pl .p .pm .cgi .prj
 DEFAULT: install all
 
 DEBUG = -DDEBUG -g
@@ -28,12 +28,7 @@ CPP = cpp $(STD_CPP_DEFINES)
 RM = del
 RL = ranlib
 
-# If you have DJGPP, you can use copy-smart, otherwise use copy
-#CP = copy-smart
-#CPy = copy
 CP=cp -b -u
-#CP = copy
-#CP = cp
 
 MAKE=make LIBNAME=$(LIBNAME)
 #TEXISPLIT=--no-split
@@ -53,7 +48,7 @@ TEXISPLIT=-split_node
 .o.dxe:
 	dxegen $*.dxe $*.o $(DXE_Objs) $(DXE_Libs)
 
-.tex.inf:
+.tex.info:
 	makeinfo --no-split $*.tex
 
 .tex.html:
@@ -71,17 +66,17 @@ TEXISPLIT=-split_node
 .c.txh:
 	c2txh <$*.c >$*.txh
 
-.pl.tex:
-	pod2texinfo $*.pl
+.pl.txh:
+	pod2txh $*.pl
 
-.pm.tex:
-	pod2texinfo $*.pm
+.pm.txh:
+	pod2txh $*.pm
 
-.p.tex:
-	pod2texinfo $*.p
+.cgi.txh:
+	pod2txh $*.cgi
 
-.prj.tex:
-	prj2texi.pm $*.prj >$*.tex
+.p.txh:
+	pod2txh $*.p
 
 .xsv.txt:
 	xsvf2ascii $*.xsv $*.txt

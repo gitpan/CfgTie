@@ -1,9 +1,9 @@
 include ../../makefile.inc
 
-pmtexfiles=TieAliases.tex TieGeneric.tex TieGroup.tex TieHost.tex \
-TieNamed.tex TieNet.tex TiePh.tex TieProto.tex TieServ.tex TieShadow.tex \
-TieUser.tex Cfgfile.tex TieRCService.tex CfgArgs.tex filever.tex
+pmtxhfiles=TieAliases.txh TieGeneric.txh TieGroup.txh TieHost.txh \
+TieNamed.txh TieNet.txh TiePh.txh TieProto.txh TieServ.txh TieShadow.txh \
+TieUser.txh Cfgfile.txh TieRCService.txh CfgArgs.txh filever.txh TieRsrc.txh
 
 install:
 
-all: $(pmtexfiles)
+all: $(pmtxhfiles)

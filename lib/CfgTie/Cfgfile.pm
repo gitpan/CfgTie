@@ -13,12 +13,12 @@ CfgTie::Cfgfile -- A module to help interface to configuration files
 
 =head1 SYNOPSIS
 
-Helps interface to text based configuration files commonly used in UNIX
+Helps interface to the text based configuration files commonly used in Unix
 
 =head1 DESCRIPTION
 
 This is a fairly generic interface to allow many configuration files to be
-used a hash ties.  I<Note: This is not intended to be called by user programs,
+used as hash ties.  I<Note: This is not intended to be called by user programs,
 but by modules wishing to reuse a template structure!>
 
    package mytie;
@@ -44,13 +44,13 @@ file.  More information on this can be found below.
 
 =item filepath
 
-I<optional>.  If defined this is the path to the configuration file to be
-opened.  If not defined, the default for the specified package will be used.
+I<optional>.  If defined, this is the path to the configuration file to be
+opened; otherwise the default for the specified package will be used.
 
 =item RCS-Object
 
-I<optional>.  If defined, this is an RCS object (or similar)  that will control
-how to check-in and check-out the configuration file.  See RCS perl module for
+I<optional>.  If defined, this is an RCS object (or similar) that will control
+how to check in and check out the configuration file.  See RCS Perl module for
 more details on how to create this object (do not use the same instance for
 each configuration file!).  Files will be checked back in when the C<END>
 routine is called.  If a C<filepath> is specified, it will override the one
@@ -84,15 +84,14 @@ will be modified.
 
 If this method is defined, it is called after the configuration file has
 changed.  It can be used, for instances, to rebuild a binary database, restart
-a service, or email martians.
+a service, or email Martians.
 
 =item C<makerewrites>
 
 This is called just before the configuration file will be rewritten.  It
 should return a reference to a function that is used to transform the current
-control file into the new one.  This is transforming function is called
-foreach line in the configuration file while it is being
-rewritten. 
+control file into the new one.  This transforming function is called
+for each line in the configuration file while it is being rewritten. 
 
 =back
 
@@ -146,12 +145,12 @@ In this case the rewrite indicates what should replace the pattern:
 
 =over 1
 
-=item
+=item *
 
 Every key that matches the pattern will be rewritten and replace with a
-new key
+new key.
 
-=item
+=item *
 
 Any element (of an entry) that matches the pattern will be modified to
 match the rewrite rule.
@@ -168,12 +167,12 @@ L<CfgTie::TieShadow>, L<CfgTie::TieUser>
 
 I<p321>
 
-=head1 Cavaets
+=head1 Caveats
 
 Additions that do not change any previously established values are reflected
 immediately (and F<newaliases> is run as appropriate).  Anything which changes
 a previously established value, regardless of whether or not it has been
-committe, are queue'd for later.  This queue is used to rewrite the file when
+committed, are queue'd for later.  This queue is used to rewrite the file when
 C<END> is executed.
 
 =head1 Author
@@ -185,6 +184,7 @@ Randall Maas (L<randym@acm.org>)
 my $FNum=137;
 my %Files2CheckIn;
 my @Thingies; 1;
+
 
 sub RCS_Handshake($)
 {
@@ -564,3 +564,53 @@ sub Comment_Add($$)
     else
      {$self->{Comments} = "$Cmt\n";}
 }
+
+#Some HTML helpers
+
+sub trx
+{
+   my $A = shift;
+   my $B='';
+   foreach my $J (@_)
+    {$B .= td($J);}
+   tr0(th($A).$B);
+}
+
+sub tr0 ($)
+{
+   my $A=shift;
+   return '<tr>'.$A."<\/tr>\n";
+}
+
+sub th
+{
+   my $A=shift;
+   if (!defined $A) {$A='';}
+   '<th class="cfgattr" align="right">'.$A.'</th>';
+}
+
+sub table
+{
+   my ($A,$B,$C)= @_;
+   "<table border=\"0\" class=\"cfgtable\" cellpadding=\"5\" ".
+   "cellspacing=\"0\">\n".th1($A,$C)."$B<\/table>\n";
+}
+
+sub td ($)
+{
+   my $A=shift;
+   if (defined $A)
+     {"<td class=\"cfgval\">$A<\/td>";}
+    else
+     {"<td class=\"cfgval\">&nbsp;<\/td>";}
+}
+
+sub th1 ($)
+{
+   my $A=shift;
+   my $N=shift;
+   if (!defined $A) {return '';}
+   if (!defined $N || $N <2) {$N=2;}
+   tr0("<th colspan=\"$N\"><h1>$A<\/h1><\/th>\n");
+}
+

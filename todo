@@ -1,9 +1,10 @@
 1. TieAliases neeeds to learn to parse :include: directives
-2. TieAliises should be able to list files used
+2. TieAliases should be able to list files used
 3. TieAliases should be able do the directed graph thing
 4. CfgAliases should list all files employed (eg /etc/aliases and :include:s)
 5. CfgAliases should be able to make a HTML table
-6. TieUser should be able to list all of the groups the user is in
 7. TieGroup should be able to list all of the users for the group (not just the added ones).
-8. A sample CSS for the HTML methods.  It should look nice.
-
+9. Be able to work with mod_perl
+10. Find a place for the resource limits in the TieGeneric.
+11. Find a place for the mount table
+12. Each module should list the files it uses (eg so they can be backed up)

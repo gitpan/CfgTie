@@ -21,8 +21,9 @@ if ($dir =~ /^(.+)-[\d\.]+$/) {$ModName="$1";}
 
 my $Pfiles="lib/$ModName/". join(".pm lib/$ModName/",
         'TieRCService','Cfgfile', 'CfgArgs',
-        'TieAliases', 'TieGeneric','TieGroup','TieHost',  'TieNamed','TieNet',
-        'TiePh',      'TieProto',  'TieServ', 'TieShadow','TieUser').'.pm';
+        'TieAliases', 'TieGeneric','TieGroup','TieHost', 'TieNamed', 'TieNet',
+        'TiePh',      'TieProto',  'TieRsrc', 'TieServ', 'TieShadow','TieUser').
+	'.pm';
 
 sub MY::postamble
 {
@@ -30,12 +31,13 @@ sub MY::postamble
    "$ModName"."_toc.html: $ModName.tex $Pfiles Intro.tex\n".
    "\tmake all -Clib/$ModName\n".
    "\tmake all -Cbin\n".
-   "\tprj2texi MANIFEST > CodeMenu.tex\n".
+   "\tmake all -Ccgi\n".
+   "\ttxh2texi . --output-file=".$ModName."2.tex\n".
    "\ttexi2html -glossary -split_node -menu $ModName.tex\n\n".
    "texi: $ModName"."_toc.html \n".
    "\t../../tup.pl $ModName\n\n".
    "tarball: ../$dir\n".
-   "\t tar cv --gzip -C .. -f../$dir-`date +%Y%m%d`.tar.gz $dir --exclude *,v --exclude blib -S\n\n";
+   "\t tar cv --gzip -C .. -f../$dir-`date +%Y%m%d`.tar.gz $dir --exclude *,v --exclude blib --exclude *.txh -S\n\n";
 }
 
 

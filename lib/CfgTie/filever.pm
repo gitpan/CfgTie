@@ -192,6 +192,30 @@ sub RCS_path($$)
      }
 }
 
+use FileHandle;
+
+sub open($)
+{
+   local($name)=@_;
+   #Save the environment so we can restore it
+   my $E=\%ENV;
+
+   #Erase the path, and other environment information
+   %ENV=();
+   $ENV{'PATH'}='/bin:/sbin';
+   my $F=new FileHandle $name;
+
+   #Restore the environment
+   %ENV=%{$E};
+   $F;
+}
+
+sub system($)
+{
+   my $F= &filever::open($_[0]."|");
+   $F->close;
+}
+
 
 my @UID_paths; # Holder of file paths that match 
 

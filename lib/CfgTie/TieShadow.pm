@@ -13,26 +13,26 @@ CfgTie::TieShadow -- an associative array of user names to password information
 
 =head1 SYNOPSIS
 
-makes the shadow database available as a regular hash
+This module makes the shadow database available as a regular hash.
 
 =head1 DESCRIPTION
 
-This is a straight forward HASH tie that allows us to access the shadow
+This is a straightforward hash tie that allows us to access the shadow
 password database sanely.
 
 =head2 Ties
 
-This tie is available for programers:
+This tie is available for programmers:
 
 C<tie %shadow,'CfgTie::TieShadow'>
 
-C<$shadow{$name}> will return a HASH reference of the named shadow information
+C<$shadow{$name}> will return a hash reference of the named shadow information
 
 
 =head2 Structure of hash
 
-Any given shadow entry has the following information assoicated with it (the
-keys are case insensitive):
+Any given shadow entry has the following information associated with it (the
+keys are case-insensitive):
 
 =over 1
 
@@ -50,7 +50,7 @@ Last time it was changed
 
 =item C<Min>
 
-The minimum number of days before a change is allow
+The minimum number of days before a change is allowed
 
 =item C<Max>
 
@@ -76,9 +76,9 @@ inactive and expires
 =back
 
 Each of these entries can be modified (even deleted), and they will be
-reflected into the overall system.  Additionally, the programmer can set any
-other associated key, but this information will only available to running
-PERL script.
+reflected in the overall system.  Additionally, the programmer can set any
+other associated key, but this information will only available to the running
+Perl script.
 
 =head2 Additional Routines
 
@@ -125,9 +125,9 @@ L<usermod(8)>,
 L<useradd(8)>,
 L<userdel(8)>
 
-=head1 Cavaets
+=head1 Caveats
 
-The current version does cache some shadow information
+The current version does cache some shadow information.
 
 =head1 Author
 

@@ -19,22 +19,22 @@ easily.
 
 =head1 DESCRIPTION
 
-This is a straight forward HASH tie that allows us to access the host database
+This is a straightforward hash tie that allows us to access the host database
 sanely.
 
 =head2 Ties
 
-There are two ties available for programers:
+There are two ties available for programmers:
 
 =over 1
 
 =item C<tie %host,'CfgTie::TieHost'>
 
-C<$host{$name}> will return a HASH reference of the named host information
+C<$host{$name}> will return a hash reference of the named host information.
 
 =item C<tie %host_addr,'CfgTie::TieHost_addr'>
 
-C<$host_addr{$addr}> will return a HASH reference for the specified host.
+C<$host_addr{$addr}> will return a hash reference for the specified host.
 
 =back
 
@@ -64,14 +64,12 @@ A list reference of addresses.  You will need something like
 
        ($a,$b,$c,$d) = unpack('C4',$Addr);
 
-to get the address out sanely..
+to get the address out sanely.
 
 =back
 
-
-Additionally, the programmer can set any
-other associated key, but this information will only available to running
-PERL script.
+Additionally, the programmer can set any other associated key, but this
+information will only be available to a running Perl script.
 
 =head1 See Also
 
@@ -82,7 +80,7 @@ L<CfgTie::TieUser>
 
 L<host(5)>
 
-=head1 Cavaets
+=head1 Caveats
 
 The current version does cache some host information.
 
