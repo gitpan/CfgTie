@@ -54,7 +54,7 @@ The minimum number of days before a change is allowed
 
 =item C<Max>
 
-Maximum number of days before a change in passowrds is required
+Maximum number of days before a change in passwords is required
 
 =item C<Warn>
 
@@ -140,8 +140,8 @@ my $Chg_FS = 1; #By default we want to update the file system when the shadow
 
 sub status
 {
-  # the information for the /etc/passwd file
-  stat '/etc/passwd';
+  # the information for the /etc/shadow file
+  stat '/etc/shadow';
 }
 
 sub TIEHASH
@@ -197,7 +197,7 @@ sub FETCH
    my $lname = lc($name);
 
    #check out our cache first
-   if (&EXISTS($self,$name)) {return $CfgTie::TieShadow_rec'by_name{$lname};}
+   if (&EXISTS($self,$lname)) {return $CfgTie::TieShadow_rec'by_name{$lname};}
 }
 
 #Bug creating shadows is not supported yet.
@@ -225,8 +225,8 @@ package CfgTie::TieShadow_id;
 
 sub status
 {
-  # the information for the /etc/passwd file
-  stat '/etc/passwd';
+  # the information for the /etc/shadow file
+  stat '/etc/shadow';
 }
 
 
@@ -356,25 +356,14 @@ sub scan_lasts
 {
    #Get the last time the read their email
 
-   #SECURITY NOTE:
-   #Change our real user id and group id to be whatever out user
-   #id and group id really are
-   my ($UID_save, $GID_save);
-   ($UID_save,$>)=($>,$<);
-   ($GID_save,$))=($(,$();
-   my $L = $CfgTie::Cfgfile'FNum++;
-   open (L, "</var/log/maillog");
-   while (<L>)
+   my $L = new Secure::File "</var/log/maillog";
+   while (<$L>)
     {
        if(/([\d\w\s:]+)\s\w+\s\w+\[\d+\]:\sLogout\sshadow\s(\w+).*/)
            {$Last{lc($2)} = $1;}
      }
 
-   close L;
-   #SECURITY NOTE:
-   #Restore real user id and group id to whatever they were before
-   ($>,$))=($UID_save,$GID_save);
-
+   $L->close;
 }
 
 sub EXISTS
@@ -508,7 +497,7 @@ sub DELETE
    else
         {
            #Just remove our local copy
-           delete $self->{$key};
+           delete $self->{$lkey};
         }
 }
 

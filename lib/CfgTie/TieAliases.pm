@@ -7,7 +7,15 @@
 package CfgTie::TieAliases;
 require CfgTie::Cfgfile;
 require Tie::Hash;
-@ISA=qw(CfgTie::Cfgfile);
+use Secure::File;
+use vars qw($VERSION @ISA);
+use AutoLoader 'AUTOLOAD';
+$VERSION='0.4';
+@ISA=qw(AutoLoader CfgTie::Cfgfile);
+#use strict;
+1;
+
+__END__
 
 =head1 NAME
 
@@ -71,12 +79,27 @@ The letters, digits, dashes, and underscores before a colon are treated as
 the name of an alias.  The alias will be expanded to whatever is on the
 line after the colon.  (Each of those is in turn expanded).
 
+=item C<:include:>I<file>
+
+Any element of the alias list that includes C<:include:> indicates that the
+specified file should be read from.  The file may only specify user names or
+email addresses.  Several include directives may used in the aliase.  It is not
+clear which of these files is the preferred file to modify.
+
+=item Continuation lines
+
+Any line that starts with a space is a continuation of the previous line.
+
 =back
 
 =head1 Caveats
 
 Not all changes to are immediately reflected to the specified file.  See the
 L<CfgTie::Cfgfile> module for more information
+
+=head1 FILES
+
+F</etc/aliases>
 
 =head1 See Also
 
@@ -91,35 +114,96 @@ L<newaliases(1)>
 
 =head1 Author
 
-Randall Maas (randym@acm.org)
+Randall Maas (L<randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 =cut
+
+sub files
+{
+   if (exists $_[0]->{'Files'})
+   {
+       return ($_[0]->{'Path'},@{$_[0]->{'Files'}});
+   }
+   $_[0]->{'Path'};
+}
 
 sub scan
 {
    # Read the aliases file
    my $self= shift;
-#   my $xself = shift;
 
-   if (!exists $self->{Path})
+   #A structure to help keep track of the files we employ
+   my %files;
+   if (!exists $self->{'Path'})
      {
         #Path has not been defined... define it to the default.
-        $self->{Path} = '/etc/aliases';
+        $self->{'Path'} = '/etc/aliases';
      }
 
-   my $F=$CfgTie::Cfgfile'FNum++;
-   if (!open(F,"<$self->{Path}")) {return;}
-   while (<F>)
+   my $F=new Secure::File "<".$self->{'Path'};
+   if (!defined $F) {return;}
+
+   $files{$self->{'Path'}}++;
+
+   while (my $L=<$F>)
     {
-       #Only keep the stuff before the comment
-       if (/^([^#]*)/)
+       chomp $L;
+       $L=~ s/\s*#.*$//;  #Remove the comments
+
+       my $currpos=$F->tell;
+
+       #Handle continuation lines
+     LINE:
+       while (<$F>)
+       {
+          if (!/^\s/)
+            {
+               #Done with the continuation lines... clean up and parse it.
+               $F->seek($currpos, 0);
+               last LINE;
+            }
+
+          #Only keep the stuff before the comment
+          chomp;
+          s/\s*#.*$//;
+
+          #Glue this line onto the big *whole* line
+          $L .= $_;
+
+          #Save our place so we can get back to it later
+          $currpos = $F->tell;
+       }
+
+       if ($L =~ /([^:]+):\s*([^\n]*)/i)
          {
-            $_=$1;
-            if (/([^:]+):\s*([^\n]*)/i)
-              {$self->{Contents}->{$1}=[split(/,\s*/, $2)];}
+           #Right here is where it gets special
+           #Would need to carefully handle includes...
+           foreach my $I (split(/[,\s]+/, $2))
+            {
+               if ($I =~ /:include:([^\s]*)/)
+                 {
+                    #Read in an include file
+                    push @{$self->{Files}}, $1;
+                    my $G = new Secure::File "<$1";
+                    if (defined $G)
+                      {
+                         while(<$G>)
+                          {
+                             chomp;
+                             s/\s*#.*$//;
+                             push @{$self->{Contents}->{$1}}, split /[,\s]+/;
+                          }
+                         $G->close;
+                      }
+                 }
+                else
+                 {
+                    push @{$self->{Contents}->{$1}},$I;
+                 }
+            }
          }
      }
-   close F;
+   $F->close;
 }
 
 sub cfg_end
@@ -141,7 +225,6 @@ sub format($$)
 sub makerewrites
 {
    my ($self) = @_;
-#   my ($pself,$self) = @_;
    my $Sub;
    my $Rules = "\$Sub = sub {\n   \$_=shift;\n";
    foreach my $I (keys %{$self->{Queue}})
@@ -166,16 +249,6 @@ sub makerewrites
      {eval $Rules;}
    if (defined $@ && length $@) {die "rewrite rules compilation failed: $@";}
    return $Sub;
-}
-
-sub new {TIEHASH(@_);}
-sub TIEHASH
-{
-   my $self =shift;
-   my $Node={};
-   my $Ret = bless $Node, $self;
-   $Ret->{delegate} = CfgTie::Cfgfile->new($Ret, @_);
-   $Ret;
 }
 
 sub ImpGroups(&$)
@@ -219,19 +292,6 @@ sub HTML
        $Ret .= "</td></tr>\n";
     }
    $Ret."</table>\n";
-}
-
-# from p325
-sub AUTOLOAD
-{
-   my $self=shift;
-   return if $AUTOLOAD =~ /::DESTROY$/;
-
-   #Strip the package name
-   $AUTOLOAD =~ s/^CfgTie::TieAliases:://;
-
-   #Pass the message along
-   $self->{delegate}->$AUTOLOAD(@_);
 }
 
 1;

@@ -5,6 +5,18 @@
 
 package CfgTie::TieRCService;
 use CfgTie::filever;
+use Secure::File;
+my %Services;
+scan (\%Services);
+
+package CfgTie::TieRCServ_rec;
+use POSIX;
+use CfgTie::filever;
+use Secure::File;
+my %ServScript;
+1;
+
+package CfgTie::TieRCService;
 
 =head1 NAME
 
@@ -137,9 +149,6 @@ sub scan ($)
    $F->close;
 }
 
-my %Services;
-scan (\%Services);
-
 sub TIEHASH
 {
    my $self=shift;
@@ -204,7 +213,6 @@ sub HTML ($)
 }
 
 package CfgTie::TieRCServ_rec;
-use POSIX;
 
 sub proc_sig($$)
 {
@@ -218,8 +226,6 @@ sub proc_sig($$)
     return -1;
 }
 
-my %ServScript;
-
 sub scan_for_script($$)
 {
    my ($serv, $path) = @_;
@@ -232,11 +238,10 @@ sub scan_for_script($$)
    $R;
 }
 
-use CfgTie::filever;
 sub scan_rcscript($)
 {
    my $self=shift;
-   my $F = CfgTie::filever::open($self->{'path'});
+   my $F = new Secure::File "<".$self->{'path'};
    while (<$F>)
     {
        if (/^\s*\#\s*chkconfig\s*:\s*(\d+)/i) 
@@ -280,14 +285,13 @@ sub proc_id($)
    if (!defined $key || !-e "/var/run/$key.pid") {return undef;}
 
    #use the canonically process ID
-   my $F = $FNum++;
-   open F, "</var/run/$key.pid" or return undef;
+   my $F = new Seucre::File "</var/run/$key.pid" or return undef;
    my ($I,$pid);
-   while (<F>)
+   while (<$F>)
     {
        if (/^(\d+)$/) {$pid=$1;}
     }
-   close F;
+   $F->close;
    return $pid;
 }
 
@@ -520,7 +524,7 @@ sub reload($)
 {
    my $self=shift;
    delete $self->{pid};
-   delete $self->{'status'};
+   delete $self->{status};
    if (-x "/usr/sbin/".$self->{'name'}.".reload")
      {
         return system("/usr/sbin/".$self->{'name'}.".reload");
@@ -534,4 +538,3 @@ sub reload($)
           }
      }
 }
-1;

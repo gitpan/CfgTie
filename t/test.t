@@ -9,7 +9,7 @@
 # (It may become useful if the test is moved to ./t subdirectory.)
 
 $loaded=1;
-BEGIN { $| = 1; print "1..22\n"; }
+BEGIN { $| = 1; print "1..24\n"; }
 END {print "not ok $loaded\n" if $loaded;}
 require Tie::Hash;
 print "ok $loaded\n"; $loaded++;
@@ -32,6 +32,8 @@ print "ok $loaded\n"; $loaded++;
 use CfgTie::TieHost;
 print "ok $loaded\n"; $loaded++;
 use CfgTie::TieUser;
+print "ok $loaded\n"; $loaded++;
+use CfgTie::TieMTab;
 print "ok $loaded\n"; $loaded++;
 use CfgTie::TieNet;
 print "ok $loaded\n"; $loaded++;
@@ -85,6 +87,8 @@ print "ok $loaded\n"; $loaded++;
 my %Generic; tie %Generic, 'CfgTie::TieGeneric';
 print "ok $loaded\n"; $loaded++;
 my %Groups; tie %Groups, 'CfgTie::TieGroup';
+print "ok $loaded\n"; $loaded++;
+my %Groups2; tie %Groups2, 'CfgTie::TieGroup', 'test/group';
 print "ok $loaded\n"; $loaded++;
 #We use our own named.boot file since not all machines have one (ie, people who
 #have not installed named!)

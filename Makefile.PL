@@ -15,29 +15,24 @@ use Cwd;
 my $dir = cwd();
 $dir =~ s/^.*\/([^\/]+)$/$1/;
 
-$VERSION="0.0";
-if ($dir =~ /-([\d\.]+)$/) {$VERSION=$1;}
-if ($dir =~ /^(.+)-[\d\.]+$/) {$ModName="$1";}
+$ModName=$dir;
+$VERSION="0.4";
 
 my $Pfiles="lib/$ModName/". join(".pm lib/$ModName/",
         'TieRCService','Cfgfile', 'CfgArgs',
         'TieAliases', 'TieGeneric','TieGroup','TieHost', 'TieNamed', 'TieNet',
         'TiePh',      'TieProto',  'TieRsrc', 'TieServ', 'TieShadow','TieUser').
-	'.pm';
+	'.pm lib/Secure/File.pm';
 
 sub MY::postamble
 {
    "\n#This assumes, of course, that you have these tools installed...\n".
    "$ModName"."_toc.html: $ModName.tex $Pfiles Intro.tex\n".
-   "\tmake all -Clib/$ModName\n".
-   "\tmake all -Cbin\n".
-   "\tmake all -Ccgi\n".
-   "\ttxh2texi . --output-file=".$ModName."2.tex\n".
+   "\ttxh2texi --pod --output-file=".$ModName."2.tex\n".
+   "\ttxh2texi --rcs --up-node=Revisions --main-node-prefix=Files --output-file=$ModName-revs.tex\n".
    "\ttexi2html -glossary -split_node -menu $ModName.tex\n\n".
    "texi: $ModName"."_toc.html \n".
-   "\t../../tup.pl $ModName\n\n".
-   "tarball: ../$dir\n".
-   "\t tar cv --gzip -C .. -f../$dir-`date +%Y%m%d`.tar.gz $dir --exclude *,v --exclude blib --exclude *.txh -S\n\n";
+   "\ttexihtml_mod $ModName\n\n";
 }
 
 
@@ -66,7 +61,3 @@ WriteMakefile(
     'EXE_FILES' => [@Scripts],
     'MAN1PODS'  => {map {my $a=$_; s/^bin\//.\/blib\/man1\//; $a,"$_.\$(MAN1EXT)";} @Scripts},
 );
-
-
-require ExtUtils::Manifest;
-ExtUtils::Manifest::mkmanifest();

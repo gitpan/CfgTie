@@ -10,7 +10,7 @@ require Exporter;
 
 =head1 NAME
 
-CfgTie::CfgArgs -- Configuration module for parsing commandline-like arguments
+C<CfgTie::CfgArgs> -- Configuration module for parsing commandline arguments
 
 =head1 SYNOPSIS
 
@@ -167,6 +167,10 @@ The hash return:
       KEY =>
       VALUE=>
    }
+
+=head1 AUTHOR
+
+Randall Maas (L<mailto:randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 =cut
 

@@ -7,7 +7,7 @@
 
 =head1 NAME
 
-CfgTie::TiePh -- a ph phonebook server configuration tool
+C<CfgTie::TiePh> -- a ph phonebook server configuration tool
 
 =head1 SYNOPSIS
 
@@ -33,16 +33,15 @@ This inherits any methods from the C<CfgTie::Cfgfile> module
 
 =head1 See Also
 
-L<CfgTie::Cfgfile>,
-L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
-L<CfgTie::TieGroup>,  L<CfgTie::TieHost>, L<CfgTie::TieNamed>,
-L<CfgTie::TieNet>,    L<CfgTie::TiePh>,   L<CfgTie::TieProto>,
-L<CfgTie::TieRCService>,
+L<CfgTie::Cfgfile>,   L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
+L<CfgTie::TieGroup>,  L<CfgTie::TieHost>,    L<CfgTie::TieMTab>,
+L<CfgTie::TieNamed>,  L<CfgTie::TieNet>,     L<CfgTie::TiePh>,
+L<CfgTie::TieProto>,  L<CfgTie::TieRCService>, L<CfgTie::TieRsrc>,
 L<CfgTie::TieServ>,   L<CfgTie::TieShadow>, L<CfgTie::TieUser>
 
 =head1 Author
 
-Randall Maas (L<randym@acm.org>)
+Randall Maas (L<randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 =cut
 
@@ -53,24 +52,15 @@ require Tie::Hash;
 
 sub scan
 {
-   my ($pself,$self) = @_;
+    my $self=shift;
 
    if (!exists $self->{Path} ||
        !defined !$self->{Path}) {$self->{Path} = 'qi.input';}
 
-   #SECURITY NOTE:
-   #Change our real user id and group id to be whatever out user
-   #id and group id really are
-   my ($UID_save, $GID_save);
-   ($UID_save,$>)=($>,$<);
-   ($GID_save,$))=($(,$();
-
-   my $F = $CfgTie::Cfgfile'FNum++;
-   open(F, '<'.$self->{Path});
+   my $F = new Secure::File '<'.$self->{Path};
    my ($who,$eml,$phn);
-   while (<F>)
+   while (my $J = <$F>)
     {
-       my $J = $_;
        foreach my $I (split("\t",$J))
         {
            $_ = $I;
@@ -84,47 +74,19 @@ sub scan
        $self->{Contents}->{$who}->{Person}=$eml;
        $self->{Contents}->{$who}->{Phone} =$phn;
     }
-   close F;
-
-   #SECURITY NOTE:
-   #Restore real user id and group id to whatever they were before
-   ($>,$))=($UID_save,$GID_save);
-
+   $F->close;
 }
 
 sub makerewrites {}
 
 sub cfg_end
 {
-   my ($pself, $self) = @_;
+   my $self=shift;
    my $Path='./';
    $_ = $self->{Path};
    if (/^(.*\/)[^\/]$/) {$Path = $1;}
    CfgTie::Cfgfile::system('cd '.$Path.'db;credb 10240 prod;maked prod <'.
 	  $self->{Path}.
           ';makei prod;build -s prod');
-}
-
-
-sub TIEHASH
-{
-   my $self =shift;
-   my $Node={};
-   my $Ret = bless $Node, $self;
-   $Ret->{delegate} = CfgTie::Cfgfile->new($Node, @_);
-   $Ret;
-}
-
-# from p325
-sub AUTOLOAD
-{
-   my $self=shift;
-   return if $AUTOLOAD =~ /::DESTROY$/;
-
-   #Strip the package name
-   $AUTOLOAD =~ s/^CfgTie::TiePh:://;
-
-   #Pass the message along
-   $self->{delegate}->$AUTOLOAD(@_);
 }
 

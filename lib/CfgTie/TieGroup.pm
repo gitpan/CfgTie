@@ -18,6 +18,10 @@ Makes the groups database available as regular hash
         tie %group,'CfgTie::TieGroup'
         $group{'myfriends'}=['jonj', @{$group{'myfriends'}];
 
+or
+
+        tie %group,'CfgTie::TieGroup', 'mygroupfile'
+
 =head1 DESCRIPTION
 
 This is a straight forward hash tie that allows us to access the user group
@@ -82,11 +86,16 @@ Perl script.
 
 =over 1
 
-=item C<&CfgTie:TieGroup'status()>
+=item C<(tied %MyHash)->files()>
+
+Returns a list of files employed.
+
+=item C<&CfgTie::TieGroup'status()>
 
 =item C<&CfgTie::TieGroup_id'status()>
 
 Will return C<stat> information on the group database.
+
 
 =back
 
@@ -108,14 +117,13 @@ F</etc/group>
 F</etc/gshadow>
 F</etc/shadow>
 
-
 =head1 See Also
 
-L<CfgTie::Cfgfile>,
-L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>, L<CfgTie::TieHost>,
-L<CfgTie::TieNamed>,   L<CfgTie::TieNet>,     L<CfgTie::TiePh>,
-L<CfgTie::TieProto>,   L<CfgTie::TieRCService>,
-L<CfgTie::TieServ>, L<CfgTie::TieShadow>, L<CfgTie::TieUser>
+L<CfgTie::Cfgfile>,      L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
+L<CfgTie::TieHost>,      L<CfgTie::TieMTab>,    L<CfgTie::TieNamed>,
+L<CfgTie::TieNet>,       L<CfgTie::TiePh>,      L<CfgTie::TieProto>,
+L<CfgTie::TieRCService>, L<CfgTie::TieRsrc>,    L<CfgTie::TieServ>,
+L<CfgTie::TieShadow>,    L<CfgTie::TieUser>
 
 L<group(5)>,
 L<passwd(5)>,
@@ -130,7 +138,7 @@ The current version does cache some group information.
 
 =head1 Author
 
-Randall Maas (L<randym@acm.org>)
+Randall Maas (L<mailto:randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 =cut
 
@@ -143,6 +151,10 @@ sub status
 sub TIEHASH
 {
    my $self = shift;
+   if (@_)
+     {
+	 return CfgTie::TieGroup_file->TIEHASH(@_);
+     }
    my $node = {};
    return bless $node, $self;
 }
@@ -513,3 +525,54 @@ sub HTML($)
     );
 }
 
+package CfgTie::TieGroup_file;
+use CfgTie::Cfgfile;
+@ISA=qw(CfgTie::Cfgfile);
+
+sub files
+{
+   $self->{'Path'};
+}
+
+sub status
+{
+   # the information for the file
+   stat $self->{'Path'};
+}
+
+sub scan
+{
+   my $self=shift;
+
+   #Check to see what the path is
+   if (!exists $self->{'Path'})
+   {
+      return;
+   }
+
+   my $F= new Secure::File "<".$self->{'Path'};
+   return unless defined $F;
+
+   while (<$F>)
+   {
+       #Chop of the comments
+       s/\s*#.*$//;
+       my @x = split /:/;
+       if (@x && defined $x[0] && length $x[0])
+         {
+	    $self->{Contents}->{$x[0]}={
+                 'name'   =>$x[0],
+                 'passwd' =>$x[1],
+                 'id'     =>$x[2],
+                 'members'=>[split(/(?:\s+|\,)/, $x[3])]
+              };
+         }
+   }
+
+   $F->close;
+}
+
+sub format($$)
+{
+   "$_[1]: ".join(',',@{$_[1]})."\n";
+}

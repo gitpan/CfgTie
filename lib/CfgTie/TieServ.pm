@@ -5,6 +5,15 @@
 
 package CfgTie::TieServ;
 use CfgTie::Cfgfile;
+use Secure::File;
+use vars qw($VERSION @ISA);
+use AutoLoader 'AUTOLOAD';
+@ISA=qw(AutoLoader);
+$VERSION='0.4';
+my (%by_name,%by_port);
+1;
+
+__END__
 
 =head1 NAME
 
@@ -83,8 +92,6 @@ The current version does cache some service information.
 Randall Maas (L<randym@acm.org>)
 
 =cut
-
-my (%by_name,%by_port);
 
 sub TIEHASH
 {
@@ -390,4 +397,4 @@ sub DELETE
    #Just remove our local copy
    delete $self{$key};
 }
-1;
+

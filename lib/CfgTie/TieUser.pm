@@ -7,6 +7,7 @@
 package CfgTie::TieUser;
 require CfgTie::filever;
 require CfgTie::Cfgfile;
+require Secure::File;
 
 =head1 NAME
 
@@ -44,7 +45,7 @@ C<$user_id{$id}> will return a hash reference for the specified user.
 
 =head2 Structure of hash
 
-Any given user entry has the following information assoicated with it (the
+Any given user entry has the following information associated with it (the
 keys are case-insensitive):
 
 =over 1
@@ -210,11 +211,11 @@ F</etc/shadow>
 
 =head1 See Also
 
-L<CfgTie::Cfgfile>, L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
-L<CfgTie::TieGroup>,
-L<CfgTie::TieHost>, L<CfgTie::TieNamed>,   L<CfgTie::TieNet>,
-L<CfgTie::TiePh>,   L<CfgTie::TieProto>,   L<CfgTie::TieServ>,
-L<CfgTie::TieShadow>
+L<CfgTie::Cfgfile>, L<CfgTie::TieAliases>,  L<CfgTie::TieGeneric>,
+L<CfgTie::TieGroup>,L<CfgTie::TieHost>,     L<CfgTie::TieMTab>,
+L<CfgTie::TieNamed>,L<CfgTie::TieNet>,      L<CfgTie::TiePh>,
+L<CfgTie::TieProto>,L<CfgTie::TieRCService>,L<CfgTie::TieRsrc>,
+L<CfgTie::TieServ>, L<CfgTie::TieShadow>
 
 L<group(5)>,
 L<passwd(5)>,
@@ -504,13 +505,15 @@ sub NEXTKEY ($$)
    my $a = scalar each %{$self};
    if ($a) {return $a;}
 
+###The following is busted
+
    #Should also return something from the extended keys if not already set.
-   if (!exists $EKeys->{$prev}) {my $a = keys %{$EKeys};}
-   while ($a = scalar each %{$EKeys})
-    {
-       if (exists $self->{$a}) {next;}
-       return $a;
-    }
+   #if (!exists $EKeys->{$prev}) {my $a = keys %{$EKeys};}
+   #while ($a = scalar each %{$EKeys})
+   # {
+   #    if (exists $self->{$a}) {next;}
+   #    return $a;
+   # }
    return $a;
 }
 
@@ -521,49 +524,38 @@ sub lastlog_FETCH($)
    use User::pwent;
    use IO::Seekable qw(SEEK_SET);
 
-   my $LASTLOG=$CfgTie::Cfgfile'FNum++;
-   if (!open(LASTLOG, "</var/log/lastlog")) {return;}
+   my $LASTLOG= new Secure::File "</var/log/lastlog";
+   return unless defined $LASTLOG;
 
    my $User = shift;
    my $U = ($User =~ /^\d+$/) ? getpwuid($User) : getpwnam($User);
-   my $R;
    if (!$U) {goto ret_from_here;}
+
+   my $R;
    my $sizeof = length(pack($lastlog_fmt,()));
-   if (seek(LASTLOG, $U->uid + $sizeof,SEEK_SET) &&
-       read(LASTLOG, $buffer, $sizeof) == $sizeof)
+   if ($LASTLOG->seek($U->uid + $sizeof,SEEK_SET) &&
+       $LASTLOG->read($buffer, $sizeof) == $sizeof)
      {
         #time line host
         $R = [unpack($lastlog_fmt, $buffer)];
      }
 
   ret_from_here:
-   close LASTLOG;
+   $LASTLOG->close;
    $R;
 }
 
 sub scan_lasts
 {
    #Get the last time the read their email
-   #SECURITY NOTE:
-   #Change our real user id and group id to be whatever out user
-   #id and group id really are
-   my ($UID_save, $GID_save);
-   ($UID_save,$>)=($>,$<);
-   ($GID_save,$))=($(,$();
-
-   my $L = $CfgTie::Cfgfile'FNum++;
-   open (L, "</var/log/maillog");
-   while (<L>)
+   my $L = new Secure::File "</var/log/maillog";
+   while (<$L>)
     {
        if(/([\d\w\s:]+)\s\w+\s\w+\[\d+\]:\sLogout\suser\s(\w+).*/)
            {$Last{lc($2)} = $1;}
      }
 
-   close L;
-   #SECURITY NOTE:
-   #Restore real user id and group id to whatever they were before
-   ($>,$))=($UID_save,$GID_save);
-
+   $L->close;
 }
 
 sub EXISTS
@@ -878,3 +870,54 @@ sub TIEHASH     {return bless {uid=>$_[1]}, $_[0];}
 sub EXISTS ($$) {CfgTie::TieUser_quota::Exists($_[0],'timeleft',$_[1]);}
 sub FETCH ($$)  {CfgTie::TieUser_quota::Fetch ($_[0],'timeleft',$_[1]);}
 
+package CfgTie::TieUser_file;
+use CfgTie::Cfgfile;
+@ISA=qw(CfgTie::Cfgfile);
+
+sub files
+{
+   $self->{'Path'};
+}
+
+sub status
+{
+   # the information for the file
+   stat $self->{'Path'};
+}
+
+sub scan
+{
+   my $self=shift;
+
+   #Check to see what the path is
+   if (!exists $self->{'Path'})
+   {
+      return;
+   }
+
+   my $F= new Secure::File "<".$self->{'Path'};
+   return unless defined $F;
+
+   while (<$F>)
+   {
+       #Chop of the comments
+       s/\s*#.*$//;
+       my @x = split /:/;
+       if (@x && defined $x[0] && length $x[0])
+         {
+	    $self->{Contents}->{$x[0]}={
+                 'name'   =>$x[0],
+                 'passwd' =>$x[1],
+                 'id'     =>$x[2],
+                 'members'=>[split(/(?:\s+|\,)/, $x[3])]
+              };
+         }
+   }
+
+   $F->close;
+}
+
+sub format($$)
+{
+   "$_[1]: ".join(',',@{$_[1]})."\n";
+}

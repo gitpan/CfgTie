@@ -6,10 +6,16 @@
 package CfgTie::Cfgfile;
 use strict 'refs';
 use CfgTie::filever;
+use Secure::File;
+use vars qw($VERSION @ISA);
+use AutoLoader;
+use AutoLoader 'AUTOLOAD';
+@ISA=qw(AutoLoader);
+$VERSION='0.4';
 
 =head1 NAME
 
-CfgTie::Cfgfile -- A module to help interface to configuration files
+C<CfgTie::Cfgfile> -- An object to help interface to configuration files
 
 =head1 SYNOPSIS
 
@@ -26,42 +32,36 @@ but by modules wishing to reuse a template structure!>
 
    @ISA = qw(CfgTie::Cfgfile);
 
-   sub TIEHASH
-   {
-      my $self = shift;
-      my $Node = {};
-      my $Obj =  bless $Node, $self;
-      $Node->{delegate} = CfgTie::Cfgfile->new($Obj,@_);
-      $Obj;
-   }
+
+The major methods:
+
+C<new(>I<$filepath>, I<@Extra stuff>C<)>
+
+or
+
+C<new(>I<$RCS-Object>, I<@Extra stuff>C<)>
 
 =over 1
 
-=item my_package_name
-
-This refers to the package which will parse and interpret the configuration
-file.  More information on this can be found below.
-
 =item filepath
 
-I<optional>.  If defined, this is the path to the configuration file to be
-opened; otherwise the default for the specified package will be used.
+If defined, this is the path to the configuration file to be opened.
 
 =item RCS-Object
 
-I<optional>.  If defined, this is an RCS object (or similar) that will control
-how to check in and check out the configuration file.  See RCS Perl module for
-more details on how to create this object (do not use the same instance for
-each configuration file!).  Files will be checked back in when the C<END>
-routine is called.  If a C<filepath> is specified, it will override the one
-previously set with the RCS object.  If no C<filepath> is specified, but the
-RCS has one specified, it will be used instead.
+If defined, this is an RCS object (or similar) that will control how to check
+in and check out the configuration file.  See RCS Perl module for more details
+on how to create this object (do not use the same instance for each
+configuration file!).  Files will be checked back in when the C<END> routine is
+called.  If a C<filepath> is specified, it will override the one previously
+set with the RCS object.  If no C<filepath> is specified, but the RCS has one
+specified, it will be used instead.
 
 =back
 
-=head2 The I<Obj> object
+=head2 The derived object
 
-The Object may need to provide the following methods:
+Your derived object may need to provide the following methods:
 
 =over 1
 
@@ -160,12 +160,12 @@ match the rewrite rule.
 
 =head1 See Also
 
-L<CfgTie::TieRCService> L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
-L<CfgTie::TieGroup>, L<CfgTie::TieHost>, L<CfgTie::TieNamed>,
-L<CfgTie::TieNet>, L<CfgTie::TiePh>, L<CfgTie::TieProto>, L<CfgTie::TieServ>,
-L<CfgTie::TieShadow>, L<CfgTie::TieUser>
+L<CfgTie::TieAliases>,   L<CfgTie::TieGeneric>, L<CfgTie::TieGroup>
+L<CfgTie::TieHost>,      L<CfgTie::TieMTab>,    L<CfgTie::TieNamed>,
+L<CfgTie::TieNet>,       L<CfgTie::TiePh>,      L<CfgTie::TieProto>,
+L<CfgTie::TieRCService>, L<CfgTie::TieRsrc>,    L<CfgTie::TieServ>,
+L<CfgTie::TieShadow>,    L<CfgTie::TieUser>
 
-I<p321>
 
 =head1 Caveats
 
@@ -177,14 +177,15 @@ C<END> is executed.
 
 =head1 Author
 
-Randall Maas (L<randym@acm.org>)
+Randall Maas (L<mailto:randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 =cut
 
 my $FNum=137;
 my %Files2CheckIn;
-my @Thingies; 1;
-
+my @Thingies;
+1;
+__END__
 
 sub RCS_Handshake($)
 {
@@ -204,7 +205,7 @@ sub RCS_Handshake($)
      }
 
    #Add it to the list of things to check in
-   $Files2CheckIn{$self->{Object}->{Path}} = $RObj;
+   $Files2CheckIn{$self->{Path}} = $RObj;
 }
 
 sub END
@@ -213,14 +214,12 @@ sub END
    foreach my $I (@Thingies)
     {
        #Skip it if there is nothing to do.
-       if (!exists $I->{Object}) {next;}
-        my $J = $I->{Object};
-       if (!exists $J->{Queue} ||
-           !scalar keys %{$J->{Queue}}) {next;}
+       if (!exists $I->{Queue} ||
+           !scalar keys %{$I->{Queue}}) {next;}
 
        my $rewrite;
        #Build up rewrite rules:
-       eval '$rewrite = $J->makerewrites($I);';
+       eval '$rewrite = $I->makerewrites();';
        if ($@)
          {
             #There was an error with the rewrite thing, skip this
@@ -228,65 +227,50 @@ sub END
             next;
          }
 
-       if (!defined $J->{Path}) {next;}
-       if (!scalar keys %{$J->{Contents}}) {next;}
-       if (-e $J->{Path} && !defined $J->{Queue}) {next;}
-
-       my $FOut= $CfgTie::Cfgfile'FNum++;
+       if (!defined $I->{Path}) {next;}
+       if (!scalar keys %{$I->{Contents}}) {next;}
+       if (-e $I->{Path} && !defined $I->{Queue}) {next;}
 
        #Announce that we will begin making changes
-       eval '$J->cfg_begin(\$I);';
+       eval '$I->cfg_begin();';
 
        #Check with the revision control system
        &RCS_Handshake($I);
 
-       #SECURITY NOTE:
-       #Change our real user id and group id to be whatever out user
-       #id and group id really are
-       my ($UID_save, $GID_save);
-       ($UID_save,$>)=($>,$<);
-       ($GID_save,$))=($(,$();
        my($Base,$NewFileName);
-       if ($J->{Path}=~/^([^\s]+)/ && $1 && length $1)
+       if ($I->{Path}=~/^([^\s]+)/ && $1 && length $1)
          {$Base=$1; $NewFileName = "$1,new";}
 	else
 	 {next;}
 
-       if (-e $J->{Path})
+       if (-e $I->{Path})
          {
             #Next rewrite file...
             # Do the file rewrite
-            my $FIn = $CfgTie::Cfgfile'FNum++;
-
-            open FIn,"<$Base" or die "Could not open file ($Base) for reading: $!\n";
-            open FOut,">$NewFileName" or die "Could not open the temporary output file ($NewFileName): $!\n";
+            my $FIn = new Secure::File "<$Base" or die "Could not open file ($Base) for reading: $!\n";
+            my $FOut = new Secure::File ">$NewFileName" or die "Could not open the temporary output file ($NewFileName): $!\n";
             my $S=[];
-            while (<FIn>)
+            while (<$FIn>)
              {
                  my $L = &$rewrite($_,$S);
-                if (defined $L) {print FOut $L;}
+                if (defined $L) {print $FOut $L;}
              }
-            close FIn;
+            $FIn->close();
+	    $FOut->close();
          }
         else
          {
             if (defined $I->{RCS})
               {$Files2CheckIn{$Base} = $I->{RCS};}
-            open FOut,">$Base";
-            foreach my $k (keys %{$J->{Contents}})
+            my $FOut = new Secure::File ">$NewFileName" or die "Could not open the output file ($Base): $!\n";
+            foreach my $k (keys %{$I->{Contents}})
              {
-                my $x=$J->{Contents}->{$k};
-                print FOut eval '$J->format($k,$x)';
-                print FOut "\n";
+                my $x=$I->{Contents}->{$k};
+                print $FOut eval '$J->format($k,$x)';
+                print $FOut "\n";
              }
+	    $FOut->close;
          }
-
-       close FOut;
-
-       #SECURITY NOTE:
-       #Restore real user id and group id to whatever they were before
-       ($>,$))=($UID_save,$GID_save);
-
        #Swap the file
        if (-e $NewFileName)
          {
@@ -295,7 +279,7 @@ sub END
          }
 
        #Announce that we are done making changes
-       eval '$J->cfg_end($I);';
+       eval '$I->cfg_end();';
     }
 
    #Check in each of the files that need to be
@@ -322,14 +306,14 @@ sub END
 sub new {TIEHASH(@_);}
 sub TIEHASH
 {
-   my ($self,$Obj,$x,@Extra)=@_;
+   my ($self,$x,@Extra)=@_;
    my $RCSObj=undef;
    my $Node={};
 
    if (defined $x)
      {
            if (ref    $x) {$RCSObj = $x;}
-        elsif (length $x) {$Obj->{Path} = $x;}
+        elsif (length $x) {$Node->{Path} = $x;}
      }
 
    if (defined $RCSObj)
@@ -345,17 +329,16 @@ sub TIEHASH
           }
      }
 
-   $Node->{Object} = $Obj;
-#   no strict 'refs';
-   $Obj->scan($Node,@Extra);
-   push @Thingies, $Node;
-   if (exists $Obj->{Path} && defined $RCSObj && !defined $RCSObj->file)
+   $self = bless $Node, $self;
+   push @Thingies, $self;
+   $self->scan(@Extra);
+   if (exists $Node->{Path} && defined $RCSObj && !defined $RCSObj->file)
      {
-        &CfgTie::filever'RCS_path($RCSObj, $Obj->{Path});
+        &CfgTie::filever'RCS_path($RCSObj, $Node->{Path});
      }
 #   print "Obj keys- ", join(":", keys %{$Node}),"\n";
 #   print "Node keys- ", join(":", keys %{$Node}),"\n";
-   return bless $Node, $self;
+   $self;
 }
 
 sub FIRSTKEY
@@ -422,31 +405,16 @@ sub STORE_cheap($$)
    #It is not completely cheap since we run new aliases...
 
    #Do the append
-   my $F=$CfgTie::Cfgfile'FNum++;
-
-   if (exists $self->{Object})
-    {eval '$self->{Object}->cfg_begin();';}
+   eval '$self->cfg_begin();';
 
    #Check with the revision control system
    &RCS_Handshake($self);
 
-   #SECURITY NOTE:
-   #Change our real user id and group id to be whatever out user
-   #id and group id really are
-   my ($UID_save, $GID_save);
-   ($UID_save,$>)=($>,$<);
-   ($GID_save,$))=($(,$();
+   my $F=new Secure::File ">>$self->{Path}" or die "Could not append: $!\n";
+   print $F $val;
+   $F->close;
 
-   open F,">>$self->{Object}->{Path}" or die "Could not append: $!\n";
-   print F $val;
-   close F;
-
-   #SECURITY NOTE:
-   #Restore real user id and group id to whatever they were before
-   ($>,$))=($UID_save,$GID_save);
-
-   if (exists $self->{Object})
-    {eval '$self->{Object}->cfg_end();';}
+   eval '$self->cfg_end();';
 }
 
 sub STORE
@@ -467,7 +435,7 @@ sub STORE
      {
         #This can be done fairly cheaply..
         my $SVal;
-        eval '$SVal=$self->{Object}->format($key,$val)';
+        eval '$SVal=$self->format($key,$val)';
         if (!$@ && defined $SVal) {return STORE_cheap $self, $SVal;}
      }
 

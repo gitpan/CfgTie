@@ -5,7 +5,7 @@
 
 =head1 NAME
 
-CfgTie::TieMTab -- an associative array of mount entries
+C<CfgTie::TieMTab> -- an associative array of mount entries
 
 =head1 SYNOPSIS
 
@@ -56,7 +56,7 @@ L<Quota::>
 
 =head1 Author
 
-Randall Maas (L<randym@acm.org>)
+Randall Maas (L<mailto:randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 =cut
 
@@ -67,6 +67,7 @@ my $Ok=0;
 if (eval("use Quota;")) {$Ok=1;}
 
 my (%by_dev,%by_path);
+1;
 
 sub TIEHASH
 {
@@ -124,7 +125,7 @@ sub MTab_scan()
    Quota::endmntent();
 }
 
-sub CfgTie::TieMTab_dev;
+package CfgTie::TieMTab_dev;
 
 sub TIEHASH
 {
@@ -138,6 +139,5 @@ sub TIEHASH
    return bless {},$self;
 }
 
-sub EXISTS {exists $CfgTie::TieMTab::by_$dev{$_[1]};}
-sub FETCH  {$CfgTie::TieMTab::by_$dev{$_[1]};}
-
+sub EXISTS {exists $CfgTie::TieMTab::by_dev{$_[1]};}
+sub FETCH  {$CfgTie::TieMTab::by_dev{$_[1]};}

@@ -98,7 +98,7 @@ Return Value:
 
 =head1 Author
 
-Randall Maas (L<randym@acm.org>)
+Randall Maas (L<randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 =cut
 
@@ -256,16 +256,4 @@ sub find_by_user
    return @UID_paths;
 }
 
-
-
-# my @UserList = (keys %Users)
-#foreach my $I @UserList
-# {
-#   if (exists $Users{'act-'.$I} &&
-#        $Users{$I}->{Id} != $Users{'act-'.$I}->{Id})
-#      {
-#         do the chown thing
-#         Modifiy the act-user so we can have the same thing
-#      }
-# }
 1;

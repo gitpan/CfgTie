@@ -8,7 +8,7 @@ package CfgTie::TieHost;
 
 =head1 NAME
 
-CfgTie::TieHost -- This accesses the hosts tables.
+C<CfgTie::TieHost> -- This accesses the hosts tables.
 
 =head1 SYNOPSIS
 
@@ -74,8 +74,9 @@ information will only be available to a running Perl script.
 =head1 See Also
 
 L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>, L<CfgTie::TieGroup>,
-L<CfgTie::TieNamed>,   L<CfgTie::TieNet>,     L<CfgTie::TiePh>,
-L<CfgTie::TieProto>,   L<CfgTie::TieServ>,    L<CfgTie::TieShadow>,
+L<CfgTie::TieMTab>,    L<CfgTie::TieNamed>,   L<CfgTie::TieNet>,
+L<CfgTie::TiePh>,      L<CfgTie::TieProto>,   L<CfgTie::TieRCService>,
+L<CfgTie::TieRsrc>,    L<CfgTie::TieServ>,    L<CfgTie::TieShadow>,
 L<CfgTie::TieUser>
 
 L<host(5)>
@@ -86,7 +87,7 @@ The current version does cache some host information.
 
 =head1 Author
 
-Randall Maas (L<randym@acm.org>)
+Randall Maas (L<mailto:randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 =cut
 

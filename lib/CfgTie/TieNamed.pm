@@ -6,7 +6,7 @@
 
 =head1 NAME
 
-CfgTie::TieNamed -- A tool to help configure the name daemon (BIND DNS server)
+C<CfgTie::TieNamed> -- A tool to help configure the name daemon (BIND DNS server)
 
 =head1 SYNOPSIS
 
@@ -203,8 +203,10 @@ I<Note:> This also derives any other methods from the C<CfgTie::Cfgfile> module
 
 L<CfgTie::Cfgfile>,
 L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,   L<CfgTie::TieGroup>,
-L<CfgTie::TieHost>,    L<CfgTie::TieNet>,       L<CfgTie::TiePh>,
-L<CfgTie::TieProto>,   L<CfgTie::TieRCService>, L<CfgTie::TieServ>,
+L<CfgTie::TieHost>,    L<CfgTie::TieMTab>,      L<CfgTie::TieNet>,
+L<CfgTie::TiePh>,
+L<CfgTie::TieProto>,   L<CfgTie::TieRCService>, L<CfgTie::TieRsrc><
+L<CfgTie::TieServ>,
 L<CfgTie::TieShadow>,  L<CfgTie::TieUser>
 
 =head1 Cavaets
@@ -230,11 +232,17 @@ package CfgTie::TieNamed;
 use CfgTie::Cfgfile;
 use CfgTie::TieRCService;
 use CfgTie::filever;
-@ISA=qw(CfgTie::Cfgfile);
+use Secure::File;
+use vars qw($VERSION @ISA);
+use AutoLoader 'AUTOLOAD';
+@ISA=qw(AutoLoader CfgTie::Cfgfile);
+$VERSION='0.4';
 my %servs;
 tie %servs, 'CfgTie::TieRCService';
 my $serv = $servs{'named'};
 1;
+
+__END__
 
 sub cfg_end
 {
@@ -259,17 +267,11 @@ sub scan
         #Should look elsewhere, like the start up files
      }
 
-   #SECURITY NOTE:
-   #Change our real user id and group id to be whatever out user
-   #id and group id really are
-   my ($UID_save, $GID_save);
-   ($UID_save,$>)=($>,$<);
-   ($GID_save,$))=($(,$();
-
-   my $F = $CfgTie::Cfgfile'FNum++;
    my $dir='./';
-   open F, '<'.$self->{Path};
-   while (<F>)
+   my $F = new Secure::File '<'.$self->{Path};
+   return unless defined $F;
+
+   while (<$F>)
     {
        if (/^\s*directory\s+([^\s\n;]+)\/?\s*/i)
          {
@@ -313,17 +315,12 @@ sub scan
             $self->{Contents}->{$l1} = [@{$a}, split(/\s+/, $2)];
          }
     }
-   close F;
-
-   #SECURITY NOTE:
-   #Restore real user id and group id to whatever they were before
-   ($>,$))=($UID_save,$GID_save);
+   $F->close;
 }
 
 
 sub makerewrites
 {
-#   my $pself= shift;
    my $self = shift;
    my $Sub;
    my $Rules = "\$Sub = sub {\n   \$_=shift;\n";
@@ -351,15 +348,6 @@ sub makerewrites
    return $Sub;
 }
 
-sub TIEHASH
-{
-   my $self =shift;
-   my $Node ={};
-   my $Ret = bless $Node, $self;
-   $Ret->{delegate} = CfgTie::Cfgfile->new($Ret, @_);
-   $Ret;
-}
-
 sub STORE
 {
    my $self = shift;
@@ -379,24 +367,33 @@ sub STORE
         {$self->{delegate}->STORE($key,$val);}
 }
 
+#sub TIEHASH
+#{
+#   my $self =shift;
+#   my $Node ={};
+#   my $Ret = bless $Node, $self;
+#   $Ret->{delegate} = CfgTie::Cfgfile->new($Ret, @_);
+#   $Ret;
+#}
+
 # from p325
-sub AUTOLOAD
-{
-   my $self=shift;
-   return if $AUTOLOAD =~ /::DESTROY$/;
+#sub AUTOLOAD
+#{
+#   my $self=shift;
+#   return if $AUTOLOAD =~ /::DESTROY$/;
 
-   #Strip the package name
-   $AUTOLOAD =~ s/^CfgTie::TieNamed:://;
+#   #Strip the package name
+#   $AUTOLOAD =~ s/^CfgTie::TieNamed:://;
 
-   if ($AUTOLOAD eq 'start' || $AUTOLOAD eq 'stop' || $AUTOLOAD eq 'restart'||
-       $AUTOLOAD eq 'reload'|| $AUTOLOAD eq 'status')
-     {
-        return (tied $serv)->$AUTOLOAD(@_);
-     }
+#   if ($AUTOLOAD eq 'start' || $AUTOLOAD eq 'stop' || $AUTOLOAD eq 'restart'||
+#       $AUTOLOAD eq 'reload'|| $AUTOLOAD eq 'status')
+#     {
+#        return (tied $serv)->$AUTOLOAD(@_);
+#     }
 
    #Pass the message along
-   $self->{delegate}->$AUTOLOAD(@_);
-}
+#   $self->{delegate}->$AUTOLOAD(@_);
+#}
 
 #List the reverses addresses spaces we primary (except loopback)
 sub RevSpaces($)
@@ -448,7 +445,7 @@ sub Check_Bidir
    my $self = shift; my $fwd = shift; my $RevN = shift;
 
    # Get the goodies of the real deal
-   if (exists $self->{delegate}) {$self = $self->{delegate};}
+#   if (exists $self->{delegate}) {$self = $self->{delegate};}
 
    my $Rev = $self->{Contents}->{primary}->{$RevN};
    my %Count;
@@ -700,23 +697,17 @@ sub addrec
 
 sub scan
 {
-   my ($self, $pself,$defdom) = @_;
-   my $F = $CfgTie::Cfgfile'FNum++;
+   my ($self, $defdom) = @_;
    my $Node;
 
    $defdom .='.'; #Need a terminating null
    $self->{Domain} = $defdom;
 
-   #SECURITY NOTE:
-   #Change our real user id and group id to be whatever out user
-   #id and group id really are
-   my ($UID_save, $GID_save);
-   ($UID_save,$>)=($>,$<);
-   ($GID_save,$))=($(,$();
-
    #Scan the file in.
-   open F, '<'.$self->{Path};
-   while (<F>)
+   my $F = new Secure::File '<'.$self->{'Path'};
+   goto SKIPREAD unless defined $F;
+
+   while ($<F>)
     {
        #Scan a simple line Grab thring things
        if (/^\s*([^\n;\s]*)\s+IN\s+(\w+)\s+([^\(;\n]+)\s*\(/i)
@@ -754,12 +745,10 @@ sub scan
             &addrec($self,$dom,$2,$3);
          }
     }
-   close F;
+   $F->close;
 
-   #SECURITY NOTE:
-   #Restore real user id and group id to whatever they were before
-   ($>,$))=($UID_save,$GID_save);
-  
+     SKIPREAD:
+
    ## Now for the fun part. We've built up the database... now we need to
    # convert it to a form we can trap and monitor;
 
@@ -778,7 +767,6 @@ sub scan
 
 sub makerewrites
 {
-#   my $pself=shift;
    my $self = shift;
    local $Sub;
    my $Rules = "\$Sub= sub {\n   \$_=shift; my \$S=shift;\n";
@@ -876,20 +864,19 @@ sub makerewrites
    return $Sub;
 }
 
-sub TIEHASH
-{
-   my ($self,$fileobj,$defdom,@rest) =@_;
-   my $Node = {base =>$defdom,};
-   my $Ret = bless $Node, $self;
-   $Ret->{delegate} = CfgTie::Cfgfile->new($Ret, $fileobj,$defdom,@rest);
-   $Ret;
-}
+#sub TIEHASH
+#{
+#   my ($self,$fileobj,$defdom,@rest) =@_;
+#   my $Node = {base =>$defdom,};
+#   my $Ret = bless $Node, $self;
+#   $Ret->{delegate} = CfgTie::Cfgfile->new($Ret, $fileobj,$defdom,@rest);
+#   $Ret;
+#}
 
 sub FETCH
 {
    my ($self, $key)=@_;
 
-print "$key\n";
    #If it is about to fetch something that doesn't exist.... tie it!
    if ($self->{delegate}->EXISTS($key))
      {return $self->{delegate}->FETCH($key);}

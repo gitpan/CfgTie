@@ -4,6 +4,10 @@
 #PERL itself.
 
 package CfgTie::TieGeneric;
+use Secure::File;
+use vars qw($VERSION @ISA);
+use AutoLoader 'AUTOLOAD';
+$VERSION='0.4';
 
 =head1 NAME
 
@@ -122,14 +126,15 @@ C<OS3::ConfigTie>.  If any of those work, we return the results.
 
 =head1 See Also
 
-L<CfgTie::TieAliases>, L<CfgTie::TieGroup>,
-L<CfgTie::TieHost>, L<CfgTie::TieNamed>,  L<CfgTie::TieNet>,
-L<CfgTie::TiePh>,   L<CfgTie::TieProto>,  L<CfgTie::TieRCService>,
-L<CfgTie::TieServ>, L<CfgTie::TieShadow>, L<CfgTie::TieUser>
+L<CfgTie::TieAliases>, L<CfgTie::TieGroup>, L<CfgTie::TieHost>,
+L<CfgTie::TieMTab>,    L<CfgTie::TieNamed>, L<CfgTie::TieNet>,
+L<CfgTie::TiePh>,      L<CfgTie::TieProto>, L<CfgTie::TieRCService>,
+L<CfgTie::TieRsrc>,    L<CfgTie::TieServ>,  L<CfgTie::TieShadow>,
+L<CfgTie::TieUser>
 
 =head1 Author
 
-Randall Maas (L<randym@acm.org>)
+Randall Maas (L<mailto:randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 =cut
 
@@ -161,7 +166,10 @@ use CfgTie::TieProto;
 use CfgTie::TieNet;
 use CfgTie::TieHost;
 @ISA=qw(CfgTie::TieGroup CfgTie::TieServ  CfgTie::TieProto
-	CfgTie::TieNet  CfgTie::TieHost);
+	CfgTie::TieNet  CfgTie::TieHost AutoLoader);
+1;
+__END__
+
 
 sub TIEHASH
 {
@@ -275,4 +283,3 @@ sub NEXTKEY
     }
    return $a;
 }
-

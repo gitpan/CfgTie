@@ -31,10 +31,10 @@ C<nlimits>, C<infinity>.  The values are always list references of the form:
 
 =head1 See Also
 
-L<CfgTie::Cfgfile>, L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
-L<CfgTie::TieGroup>,
-L<CfgTie::TieHost>, L<CfgTie::TieNamed>,   L<CfgTie::TieNet>,
-L<CfgTie::TiePh>,   L<CfgTie::TieProto>,   L<CfgTie::TieServ>,
+L<CfgTie::Cfgfile>, L<CfgTie::TieAliases>,  L<CfgTie::TieGeneric>,
+L<CfgTie::TieGroup>,L<CfgTie::TieHost>,     L<CfgTie::TieMTab>,
+L<CfgTie::TieNamed>,L<CfgTie::TieNet>,      L<CfgTie::TiePh>,
+L<CfgTie::TieProto>,L<CfgTie::TieRCService>,L<CfgTie::TieServ>,
 L<CfgTie::TieShadow>
 
 =head1 Author
@@ -63,6 +63,7 @@ my $K=
    nlimits =>RLIMIT_NLIMITS,
    infinity=>RLIMIT_INFINITY,
 };
+1;
 
 sub TIEHASH
 {
@@ -73,13 +74,11 @@ sub TIEHASH
 sub FETCH
 {
    #Get the limits setting from the system
-   getrlimits($_[0]->{id},$_[1]);
+   getrlimits($_[0]->{id},$->{$_[1]});
 }
 
 sub STORE
 {
-   my ($self,$key,$val)=@_;
-
    #Pass the rlimits setting onto the system
-   setrlimits($key, $val->[0],$val->[1]);
+   setrlimits($K->{$_[1]}, $_[2]->[0],$_[2]->[1]);
 }

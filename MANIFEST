@@ -1,6 +1,11 @@
-CfgTie.info
+CHANGES
+CONTRIB
+CfgTie-revs.tex
 CfgTie.tex
+CfgTie2.tex
 Intro.tex
+MANIFEST
+Makefile.PL
 bin/CfgAliases
 bin/CfgNamed
 bin/DNS-find-free
@@ -23,8 +28,13 @@ lib/CfgTie/TieNet.pm
 lib/CfgTie/TiePh.pm
 lib/CfgTie/TieProto.pm
 lib/CfgTie/TieRCService.pm
+lib/CfgTie/TieRealm.pm
 lib/CfgTie/TieRsrc.pm
 lib/CfgTie/TieServ.pm
 lib/CfgTie/TieShadow.pm
 lib/CfgTie/TieUser.pm
 lib/CfgTie/filever.pm
+lib/Secure/File.pm
+makefile.inc
+t/test-sf.t
+t/test.t
