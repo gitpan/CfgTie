@@ -1,0 +1,2 @@
+#
+egrep -i priam lib/*/*.pm bin/*

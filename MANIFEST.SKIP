@@ -1,0 +1,16 @@
+\bRCS\b
+^misspell
+^MANIFEST
+(?i)^makefile
+(?i)/makefile
+~$
+\.html$
+,v$
+\.old$
+\.prj$
+\.tex$
+^install
+^blib/
+_blib$
+^test/
+^MakeMaker-\d

@@ -1,0 +1,137 @@
+@menu
+
+* bin::	
+
+
+
+* lib::	
+
+
+
+@end menu
+
+@section All modules
+
+@menu
+
+* CfgAliases::	@strong{Command line utility to configure the /etc/aliases file:}  This script makes it easy to manage and update the /etc/aliases file. 
+
+* CfgNamed::	
+
+* CfgArgs::	@strong{Command line parser:} This is a module to help parse standard configuration utility command lines. 
+
+* Cfgfile::	@strong{Generic interface to configuration files:} a tie hash / object to allow accessing and modify text-based configuration files.  This even allows the files to be checked in and out of a revision control system automatically. 
+
+* filever::	@strong{File version controls:} This is a simple PERL assist module for controlling the version of a text file.  It does not replace any RCS or CVS interface, but simply makes a back up copy in a safe and sane way. 
+
+* RCService::	This is a PERL module to interact with tradition UNIX /etc/rc.d services 
+
+* TieAliases::	@strong{Mail aliases associative array:} A tie hash to allow using & modifying the mail aliases file (/etc/aliases) 
+
+* TieGeneric::	@strong{Generic associative array of configuration information:}  This is a tie that automatically ties in the other configuration associative arrays. 
+
+* TieGroup::	@strong{Group associative arrays:} This is a tie hash that associates a group name or id with the other information about that group of people.  It is designed to help make the user group database easy to access. 
+
+* TieHost::	@strong{Host name associative arrays:} This is a tie to make the network hosts tables easy to access. 
+
+* TieNamed::	@strong{BIND Domain Name Server (named) configuration module:} This is a tie hash of tie hashes that allow the named daemon to be configured on the fly, and to help keep its configuration up to date. 
+
+* TieNet::	@strong{Network address associative array:} This is a tie hash that translates a network address into a network name and vice-versa. 
+
+* TiePh::	@strong{Phonebook (ph) server configuration module:} This is an associative array that can be used to configure the ph server in unix. 
+
+* TieProto::	@strong{Procotol name associative array:} This is a tie hash that associates a protocol name with its number. 
+
+* TieServ::	@strong{Service port associative array:} This is a tie hash that associates a service name to its port number.  It is designed to make access and configuration of the services table easy. 
+
+* TieShadow::	@strong{Shadow password file tie:}  This ties the shadow password file (/etc/shadow) into a PERL associative array. 
+
+* TieUser::	@strong{User associative arrays:} This is a set of ties that associates a user name or id with the other information about that person.  It is designed to make the user database easy to access. 
+
+@end menu
+
+@node bin, lib, UP, UP
+@chapter bin
+
+
+@menu
+
+* CfgAliases::	@strong{Command line utility to configure the /etc/aliases file:}  This script makes it easy to manage and update the /etc/aliases file. 
+
+* CfgNamed::	
+
+@end menu
+
+@node CfgAliases,	CfgNamed,	,	bin
+@include bin/CfgAliases.tex
+@node CfgNamed,	,	CfgAliases,	bin
+@include bin/CfgNamed.tex
+
+@node lib, , bin, UP
+@chapter lib
+
+
+@menu
+
+* CfgArgs::	@strong{Command line parser:} This is a module to help parse standard configuration utility command lines. 
+
+* Cfgfile::	@strong{Generic interface to configuration files:} a tie hash / object to allow accessing and modify text-based configuration files.  This even allows the files to be checked in and out of a revision control system automatically. 
+
+* filever::	@strong{File version controls:} This is a simple PERL assist module for controlling the version of a text file.  It does not replace any RCS or CVS interface, but simply makes a back up copy in a safe and sane way. 
+
+* RCService::	This is a PERL module to interact with tradition UNIX /etc/rc.d services 
+
+* TieAliases::	@strong{Mail aliases associative array:} A tie hash to allow using & modifying the mail aliases file (/etc/aliases) 
+
+* TieGeneric::	@strong{Generic associative array of configuration information:}  This is a tie that automatically ties in the other configuration associative arrays. 
+
+* TieGroup::	@strong{Group associative arrays:} This is a tie hash that associates a group name or id with the other information about that group of people.  It is designed to help make the user group database easy to access. 
+
+* TieHost::	@strong{Host name associative arrays:} This is a tie to make the network hosts tables easy to access. 
+
+* TieNamed::	@strong{BIND Domain Name Server (named) configuration module:} This is a tie hash of tie hashes that allow the named daemon to be configured on the fly, and to help keep its configuration up to date. 
+
+* TieNet::	@strong{Network address associative array:} This is a tie hash that translates a network address into a network name and vice-versa. 
+
+* TiePh::	@strong{Phonebook (ph) server configuration module:} This is an associative array that can be used to configure the ph server in unix. 
+
+* TieProto::	@strong{Procotol name associative array:} This is a tie hash that associates a protocol name with its number. 
+
+* TieServ::	@strong{Service port associative array:} This is a tie hash that associates a service name to its port number.  It is designed to make access and configuration of the services table easy. 
+
+* TieShadow::	@strong{Shadow password file tie:}  This ties the shadow password file (/etc/shadow) into a PERL associative array. 
+
+* TieUser::	@strong{User associative arrays:} This is a set of ties that associates a user name or id with the other information about that person.  It is designed to make the user database easy to access. 
+
+@end menu
+
+@node CfgArgs,	Cfgfile,	,	lib
+@include lib/CfgTie/CfgArgs.tex
+@node Cfgfile,	filever,	CfgArgs,	lib
+@include lib/CfgTie/Cfgfile.tex
+@node filever,	RCService,	Cfgfile,	lib
+@include lib/CfgTie/filever.tex
+@node RCService,	TieAliases,	filever,	lib
+@include lib/CfgTie/RCService.tex
+@node TieAliases,	TieGeneric,	RCService,	lib
+@include lib/CfgTie/TieAliases.tex
+@node TieGeneric,	TieGroup,	TieAliases,	lib
+@include lib/CfgTie/TieGeneric.tex
+@node TieGroup,	TieHost,	TieGeneric,	lib
+@include lib/CfgTie/TieGroup.tex
+@node TieHost,	TieNamed,	TieGroup,	lib
+@include lib/CfgTie/TieHost.tex
+@node TieNamed,	TieNet,	TieHost,	lib
+@include lib/CfgTie/TieNamed.tex
+@node TieNet,	TiePh,	TieNamed,	lib
+@include lib/CfgTie/TieNet.tex
+@node TiePh,	TieProto,	TieNet,	lib
+@include lib/CfgTie/TiePh.tex
+@node TieProto,	TieServ,	TiePh,	lib
+@include lib/CfgTie/TieProto.tex
+@node TieServ,	TieShadow,	TieProto,	lib
+@include lib/CfgTie/TieServ.tex
+@node TieShadow,	TieUser,	TieServ,	lib
+@include lib/CfgTie/TieShadow.tex
+@node TieUser,	,	TieShadow,	lib
+@include lib/CfgTie/TieUser.tex

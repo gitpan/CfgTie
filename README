@@ -1,0 +1,67 @@
+                [3]CfgTie:: A Configuration Interface thru Perl
+                                       
+Introduction
+
+   CfgTie is a package of Perl modules and tools. These make it easier to
+   configure and maintain Unix computers.
+   
+   The idea is that just about everything in your machines environment
+   can -- nay should -- be operable thru a single consistent interface.
+   This is a set of tools that make many of the various configuration
+   subsystem in your machine appear to be Perl variables of some sort.
+   (There are other modules available from CPAN for the other aspects of
+   your environment).
+   
+  Problem Domain
+  
+   This module makes the configuration text files and subsystems
+   available to Perl as conventional objects.
+   
+   These are mapped into Perl, usually as hash arrays, but providing
+   object nethods where appropriate.
+   
+  Installation
+  
+   After unpacking the tar file, do:
+        perl Makefile.PL
+        make
+        make test
+        make install
+
+    Optional Modules
+    
+     * Rcs
+     * Getopts::Long
+       
+  How to find out more
+  
+   online documentation
+          There is a set of online documentation.
+          http://www.geocities.com/CapeCanaveral/Lab/1862/script/CfgTie_toc.html
+   mailling list
+          There is a mailling list to discuss this package.
+        Send email to cfgtie@onelist.com
+        You can subscribe by going to
+		http://www.onelist.com/subscribe.cgi/cfgtie
+        You can browse through the archives by going to
+		http://www.onelist.com/archives.cgi/cfgtie
+        You can subscribe by going to OneList's homepage.
+		http://www.onelist.com/ 
+   Contact the author:
+          Randall Maas (randym@acm.org)
+          
+  Copyright
+  
+   Copyright (C) 1998-1999, Randall Maas. All rights reserved. This
+   package is free software; you can redistribute it and/or modify it
+   under the same terms as Perl itself.
+     _________________________________________________________________
+   
+References
+
+   http://www.geocities.com/CapeCanaveral/Lab/1862/script/CfgTie_toc.html
+   http://www.onelist.com/subscribe.cgi/cfgtie
+   http://www.onelist.com/archives.cgi/cfgtie
+   http://www.onelist.com/
+   mailto:cfgtie@onelist.com
+   mailto:randym@acm.org
