@@ -28,13 +28,16 @@ This is a file to help configure the F<ph> program.
 
 =head2 Methods
 
-This inherits any methods from the C<Cfgfile> module (L<Cfgfile>)
+This inherits any methods from the C<CfgTie::Cfgfile> module
+(L<CfgTie::Cfgfile>)
 
 =head1 See Also
 
-L<Cfgfile>, L<RCService>, L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
+L<CfgTie::Cfgfile>,
+L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
 L<CfgTie::TieGroup>,  L<CfgTie::TieHost>, L<CfgTie::TieNamed>,
 L<CfgTie::TieNet>,    L<CfgTie::TiePh>,   L<CfgTie::TieProto>,
+L<CfgTie::TieRCService>,
 L<CfgTie::TieServ>,   L<CfgTie::TieShadow>, L<CfgTie::TieUser>
 
 =head1 Author
@@ -44,8 +47,9 @@ Randall Maas (L<randym@acm.org>)
 =cut
 
 package CfgTie::TiePh;
-require Cfgfile;
+require CfgTie::Cfgfile;
 require Tie::Hash;
+@ISA=qw(CfgTie::Cfgfile);
 
 sub scan
 {
@@ -61,7 +65,7 @@ sub scan
    ($UID_save,$>)=($>,$<);
    ($GID_save,$))=($(,$();
 
-   my $F = $Cfgfile'FNum++;
+   my $F = $CfgTie::Cfgfile'FNum++;
    open(F, '<'.$self->{Path});
    my ($who,$eml,$phn);
    while (<F>)
@@ -106,7 +110,7 @@ sub TIEHASH
    my $self =shift;
    my $Node={};
    my $Ret = bless $Node, $self;
-   $Node->{delegate} = Cfgfile->new($Node, @_);
+   $Ret->{delegate} = CfgTie::Cfgfile->new($Node, @_);
    $Ret;
 }
 

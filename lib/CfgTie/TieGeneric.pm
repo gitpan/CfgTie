@@ -123,10 +123,10 @@ C<OS3::ConfigTie>.  If any of those work, we return the results.
 
 =head1 See Also
 
-L<RCService> L<CfgTie::TieAliases>, L<CfgTie::TieGroup>,
+L<CfgTie::TieAliases>, L<CfgTie::TieGroup>,
 L<CfgTie::TieHost>, L<CfgTie::TieNamed>,  L<CfgTie::TieNet>,
-L<CfgTie::TiePh>,   L<CfgTie::TieProto>,  L<CfgTie::TieServ>,
-L<CfgTie::TieShadow>, L<CfgTie::TieUser>
+L<CfgTie::TiePh>,   L<CfgTie::TieProto>,  L<CfgTie::TieRCService>,
+L<CfgTie::TieServ>, L<CfgTie::TieShadow>, L<CfgTie::TieUser>
 
 =head1 Author
 
@@ -140,7 +140,7 @@ Randall Maas (L<randym@acm.org>)
 my $net_builtins ={host=>['CfgTie::TieHost'],
       service=>['CfgTie::TieServ'],
       protocol=>['CfgTie::TieProto'],
-      addr    =>['CfgTie::TieAddr']
+      addr    =>['CfgTie::TieNet']
     };
 
 # This forms the abstract tie for the mail sub-hash
@@ -154,6 +154,14 @@ my $builtins =
         mail => ['CfgTie::TieGeneric_worker', $net_builtins],
         net =>  ['CfgTie::TieGeneric_worker', $mail_builtins], 
      };
+
+use CfgTie::TieGroup;
+use CfgTie::TieServ;
+use CfgTie::TieProto;
+use CfgTie::TieNet;
+use CfgTie::TieHost;
+@ISA=qw(CfgTie::TieGroup CfgTie::TieServ  CfgTie::TieProto
+	CfgTie::TieNet  CfgTie::TieHost);
 
 sub TIEHASH
 {
@@ -220,6 +228,8 @@ sub EXISTS
 {
    my ($self, $key) = @_;
 
+   if (!defined $key) {return 0;}
+
    # Check to see if it is already mapped in, and overrides ours
    if (exists $self->{Contents}->{$key}) {return 1;}
 
@@ -232,16 +242,17 @@ sub EXISTS
         my ($A,$B) = @{$self->{builtins}->{$key}};
 
         #load the perl module
-        uses $A ();
+        eval "use $A";
 
         #Tie in the key
+	if (!defined $B) {$B=$A;}
         tie %{$self->{Contents}->{$key}}, $B;
 
         return 1;
      }
 
    #Finally try to mount the thingy
-   uses $key;
+   eval "use $key";
    tie %{$self->{Contents}->{$key}}, $key;
 }
 

@@ -3,11 +3,11 @@
 #PERL itself.
 
 
-package RCService;
+package CfgTie::TieRCService;
 
 =head1 NAME
 
-RCService -- A module to manage UNIX services
+CfgTie::TieRCService -- A module to manage UNIX services
 
 =head1 SYNOPSIS
 
@@ -80,7 +80,7 @@ sub scan_for_script($$)
    my ($serv, $path) = @_;
    $FNum++;
    opendir FNum, $path;
-   my @RCfiles = grep {/^...$serv$/} (&readdir(FNum));
+   my @RCfiles = grep {/^...$serv$/} (readdir(FNum));
    closedir FNum;
    if (!scalar @RCfiles) {return;}
    my ($R) = @RCfiles;

@@ -17,56 +17,72 @@ The parameters are a broken down into three categories:
 
 =over 1
 
-=item Adding, changing, removing, or retrieving entries
+=item Retrieving entries
 
-C<--add>, C<--delete>, C<--fetch>, C<--join>, C<--remove>, C<--rename>,
+C<--fetch>, C<--list-forward>, C<--list-primaries>,
+C<--list-reverse>, C<--list-secondaries>
+
+=item Adding, changing, removing entries
+
+C<--delete>,
+C<--remove>, C<--rename>,
 C<--set>
+
+=item Cleanliness
+
+C<--xref>
 
 =back
 
-=head2 Adding, Changing, Removing, or Retrieving Entries.
+=head2 Retrieving Entries
+
+=over 1
+
+=item C<--fetch >I<NAME>
+
+=item C<--fetch=>I<NAME>
+
+This will retrieve the list of recipients in the group I<NAME>.  If I<NAME>
+is a regular expression, information will retrieved for every group that matches
+the pattern.
+
+=item C<--list-forward>
+
+This will retrieve the list of name to address domains being served.
+
+=item C<--list-primaries>
+
+This will retrieve the list of primary domains being served.
+
+=item C<--list-reverse>
+
+This will retrieve the list of reverse DNS domains (address to name) being
+served.
+
+=item C<--list-secondaries>
+
+This will retrieve the list of secondary domains being served.
+
+=back
+
+=head2 Adding, Changing, or Removing Entries.
 
 The following specify how the change various entries.  Typically the can not be
 intermized on the same command line.  (Exceptions are noted).
 
 =over 1
 
-=item C<--add >I<ADDRESS>
+=item C<--comment >I<NAME>=I<TEXT>
 
-=item C<--add=>I<ADDRESS>
-
-This will add the I<ADDRESS> (user, group, etc.) to a mail group.  The group
-must be specified with the C<--group> option above.
+This will add a comment record (TXT) describing the named machine.
 
 =item C<--delete >I<NAME>
 
 =item C<--delete=>I<NAME>
 
-This will remove the mail alias(es) specified by I<NAME>.  It will also remove
+This will remove the alias(es) specified by I<NAME>.  It will also remove
 from any mail alias(es) (or groups) any member(s) that matches I<NAME>.  I<NAME>
 may be a regular expression.  (Can be used with C<--remove> and C<--rename>).
-
-=item C<--fetch >I<NAME>
-
-=item C<--fetch=>I<NAME>
-
-This will retrieve the list of recipients in the mail group I<NAME>.  If I<NAME>
-is a regular expression, information will retrieved for every group that matches
-the pattern.
-
-=item C<--join>
-
-=item C<--join >I<GROUP>
-
-=item C<--join=>I<GROUP>
-
-=item C<--join >I<GROUP1>,I<GROUP2>,...
-
-=item C<--join=>I<GROUP1>,I<GROUP2>,...
-
-The current or effective user will be added to a mail group(s).  If no groups 
-are specified with this option, it must be specified using the C<--group> option
-above.  Multiple C<--join>s may be used on a command line.
 
 =item C<--remove >I<NAME>
 
@@ -86,20 +102,30 @@ group.  This may be a regular expression, similar to;
 
 =item C<--set> I<NAME>=I<MEMBERS>
 
-This will create a mail group called I<NAME> with a set of specified members
+This will create a group called I<NAME> with a set of specified members
 I<MEMBERS>.
 (Can be used with C<--delete> and  C<--remove>).
 
 =back
 
-=head1 Files
+=head2 Cleanliness
 
-F</etc/aliases>
+=over 1
+
+=item C<--xref>
+
+=item C<--xref >I<FWD-NAME-SPACE>
+
+This will have the reverse and forward namespaces properly cross referenced and
+up to date.
+
+=back
+
+=head1 Files
 
 =head1 See Also
 
 L<CfgTie::CfgArgs> for more information on the standard parameters
-L<aliases(5)>
 L<named(8)>
 
 =head1 Notes
@@ -119,12 +145,15 @@ sub is_tainted {not eval {my @r = join('',@_),kill 0; 1;};}
 sub Help
 {
    print "CfgNamed allows you to change settings for your DNS server\n".
-	"\nUSAGE: CfgAliases [OPTIONS]\n";
+	"\nUSAGE: CfgNamed [OPTIONS]\n";
    print "\nSpecific operations:\n".
-	"\t    --add\tWill add the specified mail addresses to the specified\n".
-	"\t\t\temail group.\n";
-   print CfgTie::CfgArgs::Help();
-   print "\nIn this context, the specified `group' refers to the email group.\n\n";
+	"\t    --list-primaries\tThis will list the primary domains\n".
+	"\t    --list-secondaries\tThis will list the secondary domains\n".
+	"\t    --list-forward\tThis will list the name to address domains\n".
+	"\t    --list-reverse\tThis will list the reverse DNS domains\n".
+
+	"\t    --xref\tCross references the primary and reverse DNS tables\n";
+   print CfgTie::CfgArgs::Help(),"\n";
 }
 
 sub Warranty ()
@@ -142,7 +171,8 @@ sub Copyright ()
 sub ParseArgs 
 {
    my $X = shift;
-   CfgTie::CfgArgs::do($X,"join:s@","add:s@");
+   CfgTie::CfgArgs::do($X,"comment=s%","xref:s",'list-primaries!',
+		'list-secondaries!','--list-reverse!',,'--list-forward!');
    if (!scalar keys %{$X})
      {
         print "Try '$Prg --help' for more information\n";
@@ -155,18 +185,18 @@ sub ParseArgs
    if (exists $X->{'help'})      {exit -1;}
 
 
-   if (CfgTie::CfgArgs::Args_exclusive($X, "join","add","fetch",'rename'))
+   if (CfgTie::CfgArgs::Args_exclusive($X, "fetch",'rename'))
      {exit -1;}
-   if (CfgTie::CfgArgs::Args_exclusive($X, "join","add","fetch",'remove'))
+   if (CfgTie::CfgArgs::Args_exclusive($X, "add","fetch",'remove'))
      {exit -1;}
 }
 
 ParseArgs(\%MyArgs);
-my %Aliases;
+my %DNS;
 if (exists $MyArgs{'file'})
-  {tie %Aliases, CfgTie::TieAliases,$MyArgs{'file'};}
+  {tie %DNS, CfgTie::TieNamed,$MyArgs{'file'};}
 else
-  {tie %Aliases, CfgTie::TieAliases;}
+  {tie %DNS, CfgTie::TieNamed;}
 
 my %Msgs;
 my $Lang='english';
@@ -179,9 +209,6 @@ $Msgs{'english'} =
      USER_BAD_EFF  => "Effective user id is root.  This is not allowed, using the real user id.\n",
   };
 my $ErrMsgs = $Msgs{$Lang};
-
-my $EAdd =exists $MyArgs{'add'};
-my $EJoin=exists $MyArgs{'join'};
 
 sub ScrubAddresses (@)
 {
@@ -203,70 +230,21 @@ sub ScrubAddresses (@)
 
 # Validate the joining set-up
 my (%Users, $Id,@Groups);
-if ($EJoin)
-  {
-     $Id = $>;
-     #We do not intentionally allow a root user
-     if (!$Id)
-       {
-	  print $ErrMsgs->{USER_BAD_EFF};
-	  $Id = $<;
-	  if (!$Id)
-	    {
-	        print "$Prg: ",$ErrMsgs->{USER_BAD_REAL},"  ",
-			$ErrMsgs->{EXITING};
-		exit -1;
-	    }
-	}
-      use CfgTie::TieUser;
-      tie %Users, CfgTie::TieUser_id;
-      if (!exists $Users{$Id} || !exists $Users{$Id}->{'name'})
-        {
-	    print "$Prg: ",$ErrMsgs->{USER_NONAME},"  ",$ErrMsgs->{EXITING};
-	    return -1;
-	}
-   }
-
-# Determine the groups that are relevant
-if (defined $MyArgs{'join'})
-  {
-     foreach my $I (@{$MyArgs{'join'}})
-      {
-         @Groups=(@Groups,split(',',$I));
-      }
-  }
 if (exists $MyArgs{'group'})
   {
      push @Groups,$MyArgs{'group'};
   }
-
-if (($EAdd||$EJoin) && (!defined @Groups || !scalar @Groups))
-  {print $ErrMsgs->{GROUP_MISSING}; exit -1;}
 
 # Fetch anythine now...
 if (exists $MyArgs{'fetch'})
   {
      foreach my $I (@{$MyArgs{'fetch'}})
       {
-	if (exists $Aliases{$I})
-	  {print "$I\t",join(", ", @{$Aliases{$I}}),"\n";}
+	if (exists $DNS{'primary'}->{$I})
+	  {print "$I\t",join(", ", @{$DNS{'primary'}->{$I}}),"\n";}
          else
           {print "$I\n";}
       }
-  }
-
-#Add people to the groups
-if ($EAdd || $EJoin)
-  {
-     my @NewMems;
-     if ($EAdd) {@NewMems =@{$MyArgs{'add'}};}
-     if ($EJoin)
-       {
-          my $Name = $Users{$Id}->{'name'}; 
-          push @NewMems, $Name; 
-       }
-     foreach my $G (@Groups)
-      {(tied %Aliases)->APPEND($G,ScrubAddresses(@NewMems));}
   }
 
 if (exists $MyArgs{'remove'})
@@ -274,12 +252,63 @@ if (exists $MyArgs{'remove'})
      my ($N,%R)=(1);
      foreach my $L (@{$MyArgs{'remove'}})
       {if ($L=~/^([\d\w\-*?{}\[\]_@.]+)$/) {$R{$1}='';};$N++;}
-     (tied %Aliases)->RENAME(\%R);
+     (tied %DNS)->RENAME(\%R);
   }
 
 if (exists $MyArgs{'rename'})
   {
      print "Renaming stuff\n";
-     (tied %Aliases)->RENAME($MyArgs{'rename'}); 
+     (tied %DNS)->RENAME($MyArgs{'rename'}); 
   }
 
+
+if (exists $MyArgs{'xref'})
+  {
+     if (!length $MyArgs{'xref'})
+       {(tied %DNS)->RevXRef();}
+      else
+       {(tied %DNS)->RevXRef($MyArgs{'xref'});}
+  }
+
+
+sub Listings ($$)
+{
+   my $DNS = shift;
+   my $Args = shift;
+   if (exists $Args->{'list-primaries'})
+     {
+        if (!exists $DNS->{'primary'})
+          {print "No primaries\n";}
+         else
+          {print "primaries: ",join(", ",sort keys %{$DNS->{'primary'}}),"\n";}
+     }
+
+   if (exists $Args->{'list-secondaries'})
+     {
+        if (!exists ($DNS->{'secondary'}))
+          {print "No secondaries\n";}
+         else
+          {print "secondaries: ",
+			join(", ",sort keys %{$DNS->{'secondary'}}),"\n";}
+     }
+
+   if (exists $Args->{'list-reverse'})
+     {
+        my @S = (tied %{$DNS})->RevSpaces();
+        if (!scalar @S)
+          {print "No reverse name spaces\n";}
+         else
+          {print "reverse name spaces: ",join(", ",sort @S), "\n";}
+     }
+
+   if (exists $Args->{'list-forward'})
+     {
+        my @S = (tied %DNS)->FwdSpaces();
+        if (!scalar @S)
+          {print "No forward name space:\n";}
+         else
+          {print "forward name spaces: ",join(", ",sort @S), "\n";}
+     }
+}
+
+Listings(\%DNS,\%MyArgs);

@@ -66,7 +66,7 @@ PERL script.
 
 =head1 See Also
 
-L<Cfgfile>,
+L<CfgTie::Cfgfile>,
 L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>, L<CfgTie::TieGroup>,
 L<CfgTie::TieHost>,    L<CfgTie::TieNamed>,   L<CfgTie::TiePh>,
 L<CfgTie::TieProto>,   L<CfgTie::TieServ>,    L<CfgTie::TieShadow>,
@@ -139,6 +139,7 @@ sub FETCH
 }
 
 #Bug creating, deleting nets is not supported yet.
+1;
 
 package CfgTie::TieNet_addr;
 
@@ -281,4 +282,4 @@ sub DELETE
            #Just remove our local copy
            delete $self{$key};
 }
-
+1;

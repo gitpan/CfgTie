@@ -92,7 +92,7 @@ below for more details on this is handled.
 
 =item C<secondary>
 
-This is the
+This maps to a an associative array of name spaces we are secondary for.
 
 =item C<sortlist>
 
@@ -201,11 +201,11 @@ I<Note:> This also derives any other methods from the C<CfgTie::Cfgfile> module
 
 =head1 See Also
 
-L<CfgTie::Cfgfile>, L<RCService>,
-L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>, L<CfgTie::TieGroup>,
-L<CfgTie::TieHost>,    L<CfgTie::TieNet>,     L<CfgTie::TiePh>,
-L<CfgTie::TieProto>,   L<CfgTie::TieServ>,    L<CfgTie::TieShadow>,
-L<CfgTie::TieUser>
+L<CfgTie::Cfgfile>,
+L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,   L<CfgTie::TieGroup>,
+L<CfgTie::TieHost>,    L<CfgTie::TieNet>,       L<CfgTie::TiePh>,
+L<CfgTie::TieProto>,   L<CfgTie::TieRCService>, L<CfgTie::TieServ>,
+L<CfgTie::TieShadow>,  L<CfgTie::TieUser>
 
 =head1 Cavaets
 
@@ -227,10 +227,11 @@ Randall Maas (L<randym@acm.org>)
 =cut
 
 package CfgTie::TieNamed;
-use Cfgfile;
-use RCService;
-use filever;
-my $serv = RCService->new('named');
+use CfgTie::Cfgfile;
+use CfgTie::TieRCService;
+use CfgTie::filever;
+@ISA=qw(CfgTie::Cfgfile);
+my $serv = CfgTie::TieRCService->new('named');
 1;
 
 sub cfg_end
@@ -246,7 +247,6 @@ sub cfg_end
 sub scan
 {
    #This scans the named.boot file
-   my $nself= shift;
    my $self = shift;
 
    if (!exists $self->{Path})
@@ -264,7 +264,7 @@ sub scan
    ($UID_save,$>)=($>,$<);
    ($GID_save,$))=($(,$();
 
-   my $F = $Cfgfile'FNum++;
+   my $F = $CfgTie::Cfgfile'FNum++;
    my $dir='./';
    open F, '<'.$self->{Path};
    while (<F>)
@@ -285,7 +285,7 @@ sub scan
                 if (exists $self->{RCS})
                   {
                      my $xobj = Rcs->new();
-                     &filever'RCS_path($xobj, $x);
+                     &CfgTie::filever'RCS_path($xobj, $x);
 
                      $x = $xobj;
                   }
@@ -321,7 +321,7 @@ sub scan
 
 sub makerewrites
 {
-   my $pself= shift;
+#   my $pself= shift;
    my $self = shift;
    my $Sub;
    my $Rules = "\$Sub = sub {\n   \$_=shift;\n";
@@ -354,7 +354,7 @@ sub TIEHASH
    my $self =shift;
    my $Node ={};
    my $Ret = bless $Node, $self;
-   $Node->{delegate} = Cfgfile->new($Ret, @_);
+   $Ret->{delegate} = CfgTie::Cfgfile->new($Ret, @_);
    $Ret;
 }
 
@@ -402,7 +402,7 @@ sub RevSpaces($)
    my $self=shift;
 
    # Get the goodies of the real deal
-   if (exists $self->{delegate}) {$self = $self->{delegate};}
+#   if (exists $self->{delegate}) {$self = $self->{delegate};}
 
    my $P=$_;
    my @Ret;
@@ -419,9 +419,6 @@ sub RevSpaces($)
 sub FwdSpaces($)
 {
    my $self=shift;
-
-   # Get the goodies of the real deal
-   if (exists $self->{delegate}) {$self = $self->{delegate};}
 
    my $P=$_;
    my @Ret;
@@ -700,8 +697,8 @@ sub addrec
 
 sub scan
 {
-   my ($pself, $self,$defdom) = @_;
-   my $F = $Cfgfile'FNum++;
+   my ($self, $pself,$defdom) = @_;
+   my $F = $CfgTie::Cfgfile'FNum++;
    my $Node;
 
    $defdom .='.'; #Need a terminating null
@@ -778,7 +775,7 @@ sub scan
 
 sub makerewrites
 {
-   my $pself=shift;
+#   my $pself=shift;
    my $self = shift;
    local $Sub;
    my $Rules = "\$Sub= sub {\n   \$_=shift; my \$S=shift;\n";
@@ -881,7 +878,7 @@ sub TIEHASH
    my ($self,$fileobj,$defdom,@rest) =@_;
    my $Node = {base =>$defdom,};
    my $Ret = bless $Node, $self;
-   $Ret->{delegate} = Cfgfile->new($Ret, $fileobj,$defdom,@rest);
+   $Ret->{delegate} = CfgTie::Cfgfile->new($Ret, $fileobj,$defdom,@rest);
    $Ret;
 }
 

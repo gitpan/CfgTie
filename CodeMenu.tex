@@ -4,6 +4,10 @@
 
 
 
+* cgi::	
+
+
+
 * lib::	
 
 
@@ -18,13 +22,13 @@
 
 * CfgNamed::	
 
+* sys::	
+
 * CfgArgs::	@strong{Command line parser:} This is a module to help parse standard configuration utility command lines. 
 
 * Cfgfile::	@strong{Generic interface to configuration files:} a tie hash / object to allow accessing and modify text-based configuration files.  This even allows the files to be checked in and out of a revision control system automatically. 
 
 * filever::	@strong{File version controls:} This is a simple PERL assist module for controlling the version of a text file.  It does not replace any RCS or CVS interface, but simply makes a back up copy in a safe and sane way. 
-
-* RCService::	This is a PERL module to interact with tradition UNIX /etc/rc.d services 
 
 * TieAliases::	@strong{Mail aliases associative array:} A tie hash to allow using & modifying the mail aliases file (/etc/aliases) 
 
@@ -42,6 +46,8 @@
 
 * TieProto::	@strong{Procotol name associative array:} This is a tie hash that associates a protocol name with its number. 
 
+* TieRCService::	This is a PERL module to interact with tradition UNIX /etc/rc.d services 
+
 * TieServ::	@strong{Service port associative array:} This is a tie hash that associates a service name to its port number.  It is designed to make access and configuration of the services table easy. 
 
 * TieShadow::	@strong{Shadow password file tie:}  This ties the shadow password file (/etc/shadow) into a PERL associative array. 
@@ -50,7 +56,7 @@
 
 @end menu
 
-@node bin, lib, UP, UP
+@node bin, cgi, UP, UP
 @chapter bin
 
 
@@ -67,7 +73,20 @@
 @node CfgNamed,	,	CfgAliases,	bin
 @include bin/CfgNamed.tex
 
-@node lib, , bin, UP
+@node cgi, lib, bin, UP
+@chapter cgi
+
+
+@menu
+
+* sys::	
+
+@end menu
+
+@node sys,	,	,	cgi
+@include cgi/sys.cgi.tex
+
+@node lib, , cgi, UP
 @chapter lib
 
 
@@ -78,8 +97,6 @@
 * Cfgfile::	@strong{Generic interface to configuration files:} a tie hash / object to allow accessing and modify text-based configuration files.  This even allows the files to be checked in and out of a revision control system automatically. 
 
 * filever::	@strong{File version controls:} This is a simple PERL assist module for controlling the version of a text file.  It does not replace any RCS or CVS interface, but simply makes a back up copy in a safe and sane way. 
-
-* RCService::	This is a PERL module to interact with tradition UNIX /etc/rc.d services 
 
 * TieAliases::	@strong{Mail aliases associative array:} A tie hash to allow using & modifying the mail aliases file (/etc/aliases) 
 
@@ -97,6 +114,8 @@
 
 * TieProto::	@strong{Procotol name associative array:} This is a tie hash that associates a protocol name with its number. 
 
+* TieRCService::	This is a PERL module to interact with tradition UNIX /etc/rc.d services 
+
 * TieServ::	@strong{Service port associative array:} This is a tie hash that associates a service name to its port number.  It is designed to make access and configuration of the services table easy. 
 
 * TieShadow::	@strong{Shadow password file tie:}  This ties the shadow password file (/etc/shadow) into a PERL associative array. 
@@ -109,11 +128,9 @@
 @include lib/CfgTie/CfgArgs.tex
 @node Cfgfile,	filever,	CfgArgs,	lib
 @include lib/CfgTie/Cfgfile.tex
-@node filever,	RCService,	Cfgfile,	lib
+@node filever,	TieAliases,	Cfgfile,	lib
 @include lib/CfgTie/filever.tex
-@node RCService,	TieAliases,	filever,	lib
-@include lib/CfgTie/RCService.tex
-@node TieAliases,	TieGeneric,	RCService,	lib
+@node TieAliases,	TieGeneric,	filever,	lib
 @include lib/CfgTie/TieAliases.tex
 @node TieGeneric,	TieGroup,	TieAliases,	lib
 @include lib/CfgTie/TieGeneric.tex
@@ -127,9 +144,11 @@
 @include lib/CfgTie/TieNet.tex
 @node TiePh,	TieProto,	TieNet,	lib
 @include lib/CfgTie/TiePh.tex
-@node TieProto,	TieServ,	TiePh,	lib
+@node TieProto,	TieRCService,	TiePh,	lib
 @include lib/CfgTie/TieProto.tex
-@node TieServ,	TieShadow,	TieProto,	lib
+@node TieRCService,	TieServ,	TieProto,	lib
+@include lib/CfgTie/TieRCService.tex
+@node TieServ,	TieShadow,	TieRCService,	lib
 @include lib/CfgTie/TieServ.tex
 @node TieShadow,	TieUser,	TieServ,	lib
 @include lib/CfgTie/TieShadow.tex

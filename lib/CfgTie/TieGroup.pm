@@ -4,6 +4,8 @@
 #PERL itself.
 
 package CfgTie::TieGroup;
+require CfgTie::filever;
+require CfgTie::Cfgfile;
 
 =head1 NAME
 
@@ -45,13 +47,18 @@ Any given group entry has the following information assoicated with it:
 
 =over 1
 
-=item C<Name>
+=item C<name>
 
-=item C<Id>
+=item C<id>
 
-=item C<Members>
+=item C<members>
 
-A list reference of the users...
+A list reference to all of the users that are part of this group.
+
+=item C<_members>
+
+A list reference to all of the users that are explicitly listed in the
+F</etc/group> file.
 
 =back
 
@@ -104,9 +111,10 @@ F</etc/shadow>
 
 =head1 See Also
 
-L<Cfgfile>, L<RCService>,
+L<CfgTie::Cfgfile>,
 L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>, L<CfgTie::TieHost>,
-L<CfgTie::TieNamed>, L<CfgTie::TieNet>, L<CfgTie::TiePh>, L<CfgTie::TieProto>,
+L<CfgTie::TieNamed>,   L<CfgTie::TieNet>,     L<CfgTie::TiePh>,
+L<CfgTie::TieProto>,   L<CfgTie::TieRCService>,
 L<CfgTie::TieServ>, L<CfgTie::TieShadow>, L<CfgTie::TieUser>
 
 L<group(5)>,
@@ -156,7 +164,7 @@ sub NEXTKEY
    #Get the next group id in the database.
    # Get the information from the system and store it for later
    my @x = getgrent;
-   if (! scalar @x) {return;}
+   if (!scalar @x) {return;}
 
    &CfgTie::TieGroup_rec'TIEHASH(0,@x);
    return $x[0]; #Corresponds to the name
@@ -165,27 +173,28 @@ sub NEXTKEY
 sub EXISTS
 {
    my ($self,$name) = @_;
-   if (exists $CfgTie::TieGroup_rec'by_name{$name}) {return 1;}
+   my $lname =lc($name);
+   if (exists $CfgTie::TieGroup_rec'by_name{$lname}) {return 1;}
 
    # Get the information from the system and store it for later
    my @x = getgrnam $name;
    if (! scalar @x) {return 0;}
 
-   &CfgTie::TieGroup_rec'TIEHASH(0,@x);
+   $CfgTie::TieGroup_rec'by_name{$lname}=CfgTie::TieGroup_rec->new(@x);
    return 1;
 }
 
 sub FETCH
 {
    my ($self, $name) = @_;
+   if (!defined $name) {return undef;}
+   my $lname = lc($name);
 
    #check out our cache first
-   if (exists $CfgTie::TieGroup_rec'by_name{$name})
-     {return $CfgTie::TieGroup_rec'by_name{$name};}
+   if (&EXISTS($self,$lname))
+     {return $CfgTie::TieGroup_rec'by_name{$lname};}
 
-   my %X;
-   tie %X, 'CfgTie::TieGroup_rec', getgrnam $name;
-   return bless %X;
+   return undef;
 }
 
 #Bug creating groups is not supported yet.
@@ -259,8 +268,8 @@ sub EXISTS
    my @x = getgrgid $id;
    if (! scalar @x) {return 0;}
 
-   my %X;
-   tie %X, 'CfgTie::TieGroup_rec', @x;
+   $CfgTie::TieGroup_rec'by_name{$x[0]} = CfgTie::TieGroup_rec->new(@x);
+   $CfgTie::TieGroup_rec'by_id{$id} = $CfgTie::TieGroup_rec'by_name{$x[0]};
 
    return 1;
 }
@@ -269,15 +278,11 @@ sub FETCH
 {
    my ($self,$id) = @_;
 
-   if (!defined $id) {return;}
-
-   if (!&EXISTS($self,$id)) {return;}
-
    #check out our cache first
-   if (exists $CfgTie::TieGroup_rec'by_id{$id})
+   if (&EXISTS($self,$id))
      {return $CfgTie::TieGroup_rec'by_id{$id};}
 
-   return;
+   return undef;
 }
 
 #Bug creating groups is not supported yet.
@@ -318,24 +323,33 @@ package CfgTie::TieGroup_rec;
 # $by_name{$name}
 # $by_id{$id}
 
+use CfgTie::TieUser;
+my %Users;
+tie %Users, 'CfgTie::TieUser';
+sub uniq ($)
+{
+   my $L=shift;
+   my @Ret=();
+   my $J;
+   foreach my $I (sort @{$L})
+    {if (!defined $J || $J ne $I) {$J=$I; push @Ret,$I;}}
+   \@Ret;
+}
+
+sub new {&TIEHASH(@_);}
 sub TIEHASH
 {
    # Ties a single group to a register...
    my ($self,$Name,@Rest) = @_;
-   my $Node;
+   my $Node={};
+   my $lname = lc($Name);
 
-   if (exists $by_name{$Name})
+   if (scalar @Rest)
      {
-        #Just update our record...
-        $Node = $by_name{$Name};
+        ($Node->{password},$Node->{id}, $Node->{_members})=@Rest;
      }
-#    else  create it
-       
-   $Node->{Name}=$Name;
-   ($Node->{Password}, $Node->{Id}, $Node->{Members}) = @Rest;
 
-   $by_name{$Name} = $Node;
-   $by_id{$Node->{Id}} = $Node;
+   if (defined $Name)    {$Node->{name}=$Name;}
 
    return bless $Node, $self;
 }
@@ -343,35 +357,50 @@ sub TIEHASH
 sub FIRSTKEY
 {
    my $self = shift;
-   my $a = keys %self;
-   return scalar each %self;
+   my $a = keys %{$self};
+   return scalar each %{$self};
 }
 
 sub NEXTKEY
 {
    my $self = shift;
-   return scalar each %self;
+   return scalar each %{$self};
 }
 
 sub EXISTS
 {
    my ($self,$key) = @_;
-   return exists $self{$key};
+   my $lkey=lc($key);
+   if (exists $self->{$lkey}) {return 1;}
+
+   if ($lkey eq 'members')
+     {
+	my @Mems=($self->{_members});
+        foreach my $I (keys %Users)
+	 {
+	    if ($Users{$I}->{groupid} eq $self->{id}) {push @Mems, $I;}
+	 }
+	$self->{members}=uniq(\@Mems);
+	return 1;
+     }
+
+   return 0;
 }
 
 sub FETCH
 {
    my $self = shift;
    my $key = shift;
-
-   if (exists $self{$key}) {return $self{$key};}
+   my $lkey = lc($key);
+   if (EXISTS($self,$lkey)) {return $self->{$lkey};}
+   return undef;
 }
 
 # Maps the changes to a particular setting to a flag on the command line
 $groupmod_opt =
  {
-   Name => '-n',
-   Id   => '-g',
+   name => '-n',
+   id   => '-g',
  };
 
 $groupmod = '/usr/sbin/groupmod';  #Hard path to groupmod
@@ -381,8 +410,9 @@ sub STORE
 {
    # Changes a setting for the specified group... we basically call groupmod
    my ($self,$key,$val) = @_;
+   my $lkey = lc($key);
 
-   if ($key eq 'Groups')
+   if ($lkey eq 'groups')
      {
         #Handle the groups thing...
 
@@ -391,15 +421,15 @@ sub STORE
 
         system "$groupmod $self->{Name} -g $i -G ". join(',', @g);
      }
-   if (exists $groupmod_opt{$key})
+   if (exists $groupmod_opt{$lkey})
      {
         #This is something for group mod!
-        system "$groupmod $groupmod_opt{$key} $val $self->{Name}";
+        system "$groupmod $groupmod_opt{$lkey} $val $self->{Name}";
      }
     else
      {
         #Extra setting that will be lost... 8(
-        $self{$key}=$val;
+        $self->{$lkey}=$val;
      }
 }
 
@@ -407,21 +437,48 @@ sub DELETE
 {
    #Deletes a group setting
    my ($self, $key) = @_;
+   my $lkey=lc($key);
 
-      if ($key eq 'AuthMethod')
+      if ($lkey eq 'authmethod')
         {
-           system "$groupmod -A DEFAULT $self->{Name}";
+           system "$groupmod -A DEFAULT $self->{name}";
         }
-   elsif (exists $groupmod_opt{$key})
+   elsif (exists $groupmod_opt->{$lkey})
         {
            #This is something for group mod!
-           system "$groupmod $self->{Name} $groupmod_opt{$key}";
+           system "$groupmod $self->{name} $groupmod_opt->{$lkey}";
         }
    else
         {
            #Just remove our local copy
-           delete $self{$key};
+           delete $self->{$lkey};
         }
 }
 
+
+sub HTML($)
+{
+   # A routine to HTMLize the user
+   my $self=shift;
+
+   my %Keys2 = map {$_,1} (keys %{$self});
+
+   delete $Keys2{name};
+   delete $Keys2{id};
+   delete $Keys2{password};
+   delete $Keys2{members};
+
+   "<h1>".$self->{gcos}."</h1>\n".
+   "<table border=0>".
+     "<tr><th align=right>Name:</th><td>".$self->{name}."</td></tr>".
+     "<tr><th align=right>Id:</th><td>".$self->{id}."</td></tr>".
+     "<tr><th align=right>Members:</th><td>".join(', ',@{$self->{members}}).
+		"</td></tr>".
+     "<tr><th align=right>".
+   
+    join("</td></tr>\n<tr><th align=right>",
+           map {$_."</th><td>".$self->{$_}}
+                (sort keys %Keys2)).
+   "</td></tr></table>\n";
+}
 

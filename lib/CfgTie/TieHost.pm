@@ -148,6 +148,7 @@ sub FETCH
    return bless %X;
 }
 
+1;
 #Bug creating, deleting hosts is not supported yet.
 
 package CfgTie::TieHost_addr;
@@ -294,4 +295,4 @@ sub DELETE
            #Just remove our local copy
            delete $self{$key};
 }
-
+1;

@@ -2,12 +2,11 @@
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.
 
-
-package filever;
+package CfgTie::filever;
 
 =head1 NAME
 
-filever -- a simple module for substituting newer versions into a file system.
+CfgTie::filever -- a simple module for substituting newer versions into a file system.
 
 =head1 SYNOPSIS
 

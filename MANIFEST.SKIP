@@ -12,5 +12,8 @@
 ^install
 ^blib/
 _blib$
-^test/
+^test
+^todo
 ^MakeMaker-\d
+^README
+^tmp

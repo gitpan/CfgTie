@@ -5,7 +5,7 @@
 
 package CfgTie::Cfgfile;
 use strict 'refs';
-use filever;
+use CfgTie::filever;
 
 =head1 NAME
 
@@ -23,9 +23,8 @@ but by modules wishing to reuse a template structure!>
 
    package mytie;
    require CfgTie::Cfgfile;
-   require Tie::Hash;
 
-   @ISA = qw(Tie:Hash);
+   @ISA = qw(CfgTie::Cfgfile);
 
    sub TIEHASH
    {
@@ -162,7 +161,7 @@ match the rewrite rule.
 
 =head1 See Also
 
-L<RCService> L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
+L<CfgTie::TieRCService> L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
 L<CfgTie::TieGroup>, L<CfgTie::TieHost>, L<CfgTie::TieNamed>,
 L<CfgTie::TieNet>, L<CfgTie::TiePh>, L<CfgTie::TieProto>, L<CfgTie::TieServ>,
 L<CfgTie::TieShadow>, L<CfgTie::TieUser>
@@ -233,7 +232,7 @@ sub END
        if (!scalar keys %{$J->{Contents}}) {next;}
        if (-e $J->{Path} && !defined $J->{Queue}) {next;}
 
-       my $FOut= $Cfgfile'FNum++;
+       my $FOut= $CfgTie::Cfgfile'FNum++;
 
        #Announce that we will begin making changes
        eval '$J->cfg_begin(\$I);';
@@ -257,7 +256,7 @@ sub END
          {
             #Next rewrite file...
             # Do the file rewrite
-            my $FIn = $Cfgfile'FNum++;
+            my $FIn = $CfgTie::Cfgfile'FNum++;
 
             open FIn,"<$Base" or die "Could not open file ($Base) for reading: $!\n";
             open FOut,">$NewFileName" or die "Could not open the temporary output file ($NewFileName): $!\n";
@@ -292,7 +291,7 @@ sub END
        if (-e $NewFileName)
          {
             #Rotate the file in
-            &filever'Rotate($Base,$NewFileName);
+            &CfgTie::filever'Rotate($Base,$NewFileName);
          }
 
        #Announce that we are done making changes
@@ -314,7 +313,7 @@ sub END
        my @Args = ('-u',"-m$Cmt");
        #Check to see if we need an initial description.
        if (!defined $Obj->comments) {@Args=(@Args, '-t-');}
-       print "Checkin' in\n";
+#       print "Checkin' in\n";
        $Obj->ci(@Args);
     }
    %Files2CheckIn=();
@@ -347,14 +346,15 @@ sub TIEHASH
      }
 
    $Node->{Object} = $Obj;
-   no strict 'refs';
+#   no strict 'refs';
    $Obj->scan($Node,@Extra);
    push @Thingies, $Node;
    if (exists $Obj->{Path} && defined $RCSObj && !defined $RCSObj->file)
      {
-        &filever'RCS_path($RCSObj, $Obj->{Path});
+        &CfgTie::filever'RCS_path($RCSObj, $Obj->{Path});
      }
-
+#   print "Obj keys- ", join(":", keys %{$Node}),"\n";
+#   print "Node keys- ", join(":", keys %{$Node}),"\n";
    return bless $Node, $self;
 }
 
@@ -422,7 +422,7 @@ sub STORE_cheap($$)
    #It is not completely cheap since we run new aliases...
 
    #Do the append
-   my $F=$Cfgfile'FNum++;
+   my $F=$CfgTie::Cfgfile'FNum++;
 
    if (exists $self->{Object})
     {eval '$self->{Object}->cfg_begin();';}

@@ -1,9 +1,8 @@
-README
 bin/CfgAliases
 bin/CfgNamed
+cgi/sys.cgi
 lib/CfgTie/CfgArgs.pm
 lib/CfgTie/Cfgfile.pm
-lib/CfgTie/RCService.pm
 lib/CfgTie/TieAliases.pm
 lib/CfgTie/TieGeneric.pm
 lib/CfgTie/TieGroup.pm
@@ -12,7 +11,9 @@ lib/CfgTie/TieNamed.pm
 lib/CfgTie/TieNet.pm
 lib/CfgTie/TiePh.pm
 lib/CfgTie/TieProto.pm
+lib/CfgTie/TieRCService.pm
 lib/CfgTie/TieServ.pm
 lib/CfgTie/TieShadow.pm
 lib/CfgTie/TieUser.pm
 lib/CfgTie/filever.pm
+lib/CfgTie/tmp

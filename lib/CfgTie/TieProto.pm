@@ -64,7 +64,7 @@ PERL script.
 
 =head1 See Also
 
-L<Cfgfile>, L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
+L<CfgTie::Cfgfile>, L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
 L<CfgTie::TieGroup>,   L<CfgTie::TieHost>, L<CfgTie::TieNamed>,
 L<CfgTie::TieNet>,     L<CfgTie::TiePh>,   L<CfgTie::TieProto>,
 L<CfgTie::TieServ>,    L<CfgTie::TieShadow>,  L<CfgTie::TieUser>
@@ -136,6 +136,7 @@ sub FETCH
 }
 
 #Bug creating, deleting protos is not supported yet.
+1;
 
 package CfgTie::TieProto_num;
 
@@ -278,4 +279,4 @@ sub DELETE
    #Just remove our local copy
    delete $self{$key};
 }
-
+1;

@@ -114,7 +114,23 @@ Similarly, the value can be specified
         --value
 
 =head2 Other flags
-	--file
+
+=over 1
+
+=item C<--file >FILE
+
+=item C<--file=>FILE
+
+This specifies the configuration file to employ.  If none is specified, the
+default for the particular subsystem will be used instead.  
+
+=item C<--comment >COMMENT
+
+=item C<--comment=>COMMENT
+
+This provides a text comment on what changes are being made.
+
+=back
 
         -n,
         --dry-run,
@@ -156,6 +172,7 @@ use Getopt::Long;
 
 my @GetoptLong_Rules=(
 	"scope=s","application:s","session!","user:s","group:s","op=s",
+
 	#Options that take associative arrays
 	"set:s%", "rename:s%","copy:s%",
 
@@ -167,6 +184,7 @@ my @GetoptLong_Rules=(
 
 	#Control of wether or not it will actually do it
 	"dry-run|just-print|recon!",
+	"list!",
 	#Miscellaneous stuff:
 	"copyright!", "help|info|information|manual:s","warranty!","verbose!",
 	"version!");
@@ -239,7 +257,7 @@ sub Help()
    "\t\n".
    "\nInformative output:\n".
    "$L--copyright\tPrints this programs copyright information.\n".
-   "$L--help\tPrints this help list.  Exits without doing any operation\n".
+   "$L--help\tPrints this help list.  Exits without doing any\n\t\t\toperation\n".
    "$L--verbose\t\n".
    "$L--version\tDisplays this programs version information.  Exits\n".
    "\t\t\twithout doing any operation.\n".

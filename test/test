@@ -1,5 +1,8 @@
 #
 
+#These are various tests for a completed install.... these need to be updated
+#for test.pl
+
 cp aliases.start aliases
 CfgAliases --file aliases --fetch gw >tmp
 if diff -q tmp aliases.fetch ; then

@@ -20,9 +20,9 @@ if ($dir =~ /-([\d\.]+)$/) {$VERSION=$1;}
 if ($dir =~ /^(.+)-[\d\.]+$/) {$ModName="$1";}
 
 my $Pfiles="lib/$ModName/". join(".pm lib/$ModName/",
-        'RCService', 'Cfgfile', 'CfgArgs',
-        'TieAliases','TieGeneric','TieGroup','TieHost',  'TieNamed','TieNet',
-        'TiePh',     'TieProto',  'TieServ', 'TieShadow','TieUser').'.pm';
+        'TieRCService','Cfgfile', 'CfgArgs',
+        'TieAliases', 'TieGeneric','TieGroup','TieHost',  'TieNamed','TieNet',
+        'TiePh',      'TieProto',  'TieServ', 'TieShadow','TieUser').'.pm';
 
 sub MY::postamble
 {
@@ -33,7 +33,7 @@ sub MY::postamble
    "\tprj2texi MANIFEST > CodeMenu.tex\n".
    "\ttexi2html -glossary -split_node -menu $ModName.tex\n\n".
    "texi: $ModName"."_toc.html \n".
-   "\t../tup.pl $ModName\n\n".
+   "\t../../tup.pl $ModName\n\n".
    "tarball: ../$dir\n".
    "\t tar cv --gzip -C .. -f../$dir-`date +%Y%m%d`.tar.gz $dir --exclude *,v --exclude blib -S\n\n";
 }

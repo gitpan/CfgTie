@@ -5,6 +5,7 @@
 
 
 package CfgTie::TieShadow;
+use CfgTie::filever;
 
 =head1 NAME
 
@@ -111,7 +112,7 @@ F</etc/shadow>
 
 =head1 See Also
 
-L<Cfgfile>,  L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
+L<CfgTie::Cfgfile>,  L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
 L<CfgTie::TieGroup>,
 L<CfgTie::TieHost>,  L<CfgTie::TieNamed>,  L<CfgTie::TieNet>,
 L<CfgTie::TiePh>,    L<CfgTie::TieProto>,  L<CfgTie::TieServ>,
@@ -361,7 +362,7 @@ sub scan_lasts
    my ($UID_save, $GID_save);
    ($UID_save,$>)=($>,$<);
    ($GID_save,$))=($(,$();
-   my $L = $Cfgfile'FNum++;
+   my $L = $CfgTie::Cfgfile'FNum++;
    open (L, "</var/log/maillog");
    while (<L>)
     {
@@ -465,7 +466,7 @@ sub STORE
 
              # Now we need to identify all of the files.. this may take a
              # long time
-             @FSet= &filever'find_by_user ('/', $self->{id});
+             @FSet= &CfgTie::filever'find_by_user ('/', $self->{id});
 
              if (defined @FSet && scalar @FSet) {$FSUp = 1;}
           }

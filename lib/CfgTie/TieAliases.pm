@@ -65,7 +65,7 @@ L<CfgTie::Cfgfile> module for more information
 
 =head1 See Also
 
-L<CfgTie::Cfgfile>, L<RCService>,
+L<CfgTie::Cfgfile>, L<CfgTie::TieRCService>,
 L<CfgTie::TieGeneric>, L<CfgTie::TieGroup>, L<CfgTie::TieHost>,
 L<CfgTie::TieNamed>,   L<CfgTie::TieNet>, L<CfgTie::TiePh>,
 L<CfgTie::TieProto>,   L<CfgTie::TieServ>,  L<CfgTie::TieShadow>,

@@ -5,6 +5,8 @@
 
 
 package CfgTie::TieUser;
+require CfgTie::filever;
+require CfgTie::Cfgfile;
 
 =head1 NAME
 
@@ -178,7 +180,8 @@ F</etc/shadow>
 
 =head1 See Also
 
-L<Cfgfile>, L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>, L<CfgTie::TieGroup>,
+L<CfgTie::Cfgfile>, L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
+L<CfgTie::TieGroup>,
 L<CfgTie::TieHost>, L<CfgTie::TieNamed>,   L<CfgTie::TieNet>,
 L<CfgTie::TiePh>,   L<CfgTie::TieProto>,   L<CfgTie::TieServ>,
 L<CfgTie::TieShadow>
@@ -233,7 +236,7 @@ sub NEXTKEY
    #Get the next user id in the database.
    # Get the information from the system and store it for later
    my @x = getpwent;
-   if (! scalar @x) {return;}
+   if (!scalar @x) {return;}
 
    &CfgTie::TieUser_rec'TIEHASH(0,@x);
    return $x[0]; #Corresponds to the name
@@ -262,7 +265,8 @@ sub FETCH
    my $lname = lc($name);
 
    #check out our cache first
-   if (&EXISTS($self,$name)) {return $CfgTie::TieUser_rec'by_name{$lname};}
+   if (&EXISTS($self,$lname))
+     {return $CfgTie::TieUser_rec'by_name{$lname};}
 }
 
 #Bug creating users is not supported yet.
@@ -433,7 +437,7 @@ sub lastlog_FETCH($)
    ($UID_save,$>)=($>,$<);
    ($GID_save,$))=($(,$();
 
-   my $LASTLOG=$Cfgfile'FNum++;
+   my $LASTLOG=$CfgTie::Cfgfile'FNum++;
    if (!open(LASTLOG, "</var/log/lastlog")) {return;}
 
    my $User = shift;
@@ -468,7 +472,7 @@ sub scan_lasts
    ($UID_save,$>)=($>,$<);
    ($GID_save,$))=($(,$();
 
-   my $L = $Cfgfile'FNum++;
+   my $L = $CfgTie::Cfgfile'FNum++;
    open (L, "</var/log/maillog");
    while (<L>)
     {
@@ -582,7 +586,7 @@ sub STORE
 
              # Now we need to identify all of the files.. this may take a
              # long time
-             @FSet= &filever'find_by_user ('/', $self->{id});
+             @FSet= &CfgTie::filever'find_by_user ('/', $self->{id});
 
              if (defined @FSet && scalar @FSet) {$FSUp = 1;}
           }
@@ -612,11 +616,11 @@ sub DELETE
    my ($self, $key) = @_;
    my $lkey=lc($key);
 
-      if ($key eq 'authmethod')
+      if ($lkey eq 'authmethod')
         {
            system "$usermod -A DEFAULT ".$self->{name};
         }
-   elsif (exists $usermod_opt->{$key})
+   elsif (exists $usermod_opt->{$lkey})
         {
            #This is something for user mod!
            system "$usermod ".$usermod_opt->{$lkey}." ".$self->{name};
@@ -624,7 +628,7 @@ sub DELETE
    else
         {
            #Just remove our local copy
-           delete $self->{$key};
+           delete $self->{$lkey};
         }
 }
 
@@ -640,14 +644,16 @@ sub HTML($)
    delete $Keys2{name};
    delete $Keys2{id};
    delete $Keys2{groupid};
-   delete $Keys2{passwd};
+   delete $Keys2{password};
+   my ($G) = getgrgid($self->{groupid});
 
    "<h1>".$self->{gcos}."</h1>\n".
    "<table border=0>".
      "<tr><th align=right>Full Name:</th><td>".$self->{gcos}."</td></tr>".
      "<tr><th align=right>login:</th><td>".$self->{name}."</td></tr>".
      "<tr><th align=right>Id:</th><td>".$self->{id}."</td></tr>".
-     "<tr><th align=right>Group Id:</th><td>".$self->{groupid}."</td></tr>".
+     "<tr><th align=right>Group:</th><td><a href=\"/group/$G\">".$G."</a> (".
+	$self->{groupid}.")</td></tr>".
      "<tr><th align=right>".
    
     join("</td></tr>\n<tr><th align=right>",

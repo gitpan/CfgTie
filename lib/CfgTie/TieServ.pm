@@ -67,7 +67,7 @@ PERL script.
 
 =head1 See Also
 
-L<Cfgfile>,  L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
+L<CfgTie::Cfgfile>,  L<CfgTie::TieAliases>, L<CfgTie::TieGeneric>,
 L<CfgTie::TieGroup>,
 L<CfgTie::TieHost>,   L<CfgTie::TieNamed>, L<CfgTie::TieNet>,
 L<CfgTie::TiePh>,     L<CfgTie::TieProto>, L<CfgTie::TieShadow>,
@@ -140,6 +140,7 @@ sub FETCH
 }
 
 #Bug creating, deleting servs is not supported yet.
+1;
 
 package CfgTie::TieServ_port;
 
@@ -283,4 +284,4 @@ sub DELETE
            #Just remove our local copy
            delete $self{$key};
 }
-
+1;

@@ -305,3 +305,8 @@ if (exists $MyArgs{'rename'})
      (tied %Aliases)->RENAME($MyArgs{'rename'}); 
   }
 
+
+if (exists $MyArgs{'list'})
+  {
+     print "Aliases: ", join(', ', sort keys %Aliases),"\n";
+  }
