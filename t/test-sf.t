@@ -21,12 +21,25 @@ print "ok 1\n";
 print STDERR "Plain test\n";
 my $N=new Secure::File;
 $N->open(">/tmp/$$",0666);
-print "ok 2\n";
+if (-f "/tmp/$$")
+  {
+     print "ok 2\n";
+     unlink "/tmp/$$";
+  }
+else
+  {print "not ok 2\n";}
 
 #Open a new file, with the same name
 print STDERR "New open test\n";
 my $N2=new Secure::File ">/tmp/$$";
 #Do a stat:: they shouldn't be the same
-print "ok 3\n";
+if (-f "/tmp/$$")
+  {
+     print "ok 3\n";
+     unlink "/tmp/$$";
+  }
+else
+  {print "not ok 3\n";}
+
 #Now close the files
 #And see of the files inodes are what we expect

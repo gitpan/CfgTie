@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-#Copyright 1998-1999, Randall Maas.  All rights reserved.  This program is free
+#Copyright 1998-2001, Randall Maas.  All rights reserved.  This program is free
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.
 
@@ -7,7 +7,7 @@ package CfgTie::TieGeneric;
 use Secure::File;
 use vars qw($VERSION @ISA);
 use AutoLoader 'AUTOLOAD';
-$VERSION='0.4';
+$VERSION='0.41';
 
 =head1 NAME
 

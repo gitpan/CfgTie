@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-#Copyright 1998-1999, Randall Maas.  All rights reserved.  This program is free
+#Copyright 1998-2001, Randall Maas.  All rights reserved.  This program is free
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.
 
@@ -209,7 +209,7 @@ L<CfgTie::TieProto>,   L<CfgTie::TieRCService>, L<CfgTie::TieRsrc><
 L<CfgTie::TieServ>,
 L<CfgTie::TieShadow>,  L<CfgTie::TieUser>
 
-=head1 Cavaets
+=head1 Caveats
 
 Much of the information is cached and the file is updated at the end.  The
 C<named> process will sent the C<SIGHUP> signal to restart and reload the
@@ -236,7 +236,7 @@ use Secure::File;
 use vars qw($VERSION @ISA);
 use AutoLoader 'AUTOLOAD';
 @ISA=qw(AutoLoader CfgTie::Cfgfile);
-$VERSION='0.4';
+$VERSION='0.41';
 my %servs;
 tie %servs, 'CfgTie::TieRCService';
 my $serv = $servs{'named'};

@@ -251,7 +251,7 @@ if (exists $MyArgs{'group'})
      push @Groups,$MyArgs{'group'};
   }
 
-if (($EAdd||$EJoin) && (!defined @Groups || !scalar @Groups))
+if (($EAdd||$EJoin) && (!@Groups || !scalar @Groups))
   {Fatal(GROUP_MISSING);}
 
 # Fetch anythine now...

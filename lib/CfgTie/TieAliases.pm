@@ -1,16 +1,17 @@
 #!/usr/bin/perl -w
-#Copyright 1998-1999, Randall Maas.  All rights reserved.  This program is free
+#Copyright 1998-2001, Randall Maas.  All rights reserved.  This program is free
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.
 
 
 package CfgTie::TieAliases;
-require CfgTie::Cfgfile;
+use CfgTie::Cfgfile;
 require Tie::Hash;
 use Secure::File;
 use vars qw($VERSION @ISA);
+$VERSION='0.41';
 use AutoLoader 'AUTOLOAD';
-$VERSION='0.4';
+use Carp;
 @ISA=qw(AutoLoader CfgTie::Cfgfile);
 #use strict;
 1;
@@ -140,8 +141,12 @@ sub scan
         $self->{'Path'} = '/etc/aliases';
      }
 
-   my $F=new Secure::File "<".$self->{'Path'};
-   if (!defined $F) {return;}
+   my $F=new Secure::File '<'.$self->{'Path'};
+   if (!defined $F)
+     {
+	carp "CfgTie::TieAliases: Unable to open aliases file:". $self->{'Path'};
+	return;
+     }
 
    $files{$self->{'Path'}}++;
 

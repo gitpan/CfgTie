@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Tw
-#Copyright 1998-1999, Randall Maas.  All rights reserved.  This program is free
+#Copyright 1998-2001, Randall Maas.  All rights reserved.  This program is free
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.
 
@@ -457,7 +457,7 @@ sub STORE
              # long time
              @FSet= &CfgTie::filever'find_by_user ('/', $self->{id});
 
-             if (defined @FSet && scalar @FSet) {$FSUp = 1;}
+             if (@FSet && scalar @FSet) {$FSUp = 1;}
           }
 
         my $X = $shadowmod_opt2->{$lkey};

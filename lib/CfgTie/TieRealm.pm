@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-#Copyright 1998-1999, Randall Maas.  All rights reserved.  This program is free
+#Copyright 1998-2001, Randall Maas.  All rights reserved.  This program is free
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.
 
@@ -14,7 +14,7 @@ Makes it easy to manage a variety of web servers thru one.
 =head DESCRIPTION
 
 
-=head1 Cavaets
+=head1 Caveats
 
 It is not able to modify the main realms configuration file.
 
@@ -27,6 +27,8 @@ Randall Maas (L<randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 package CfgTie::TieRealm;
 use HTTPD::Realm;
 
+use vars qw($VERSION @ISA);
+$VERSION='0.41';
 @ISA=qw(HTTPD::Realm);
 
 sub TIEHASH

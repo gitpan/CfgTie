@@ -9,7 +9,7 @@
 # (It may become useful if the test is moved to ./t subdirectory.)
 
 $loaded=1;
-BEGIN { $| = 1; print "1..24\n"; }
+BEGIN { $| = 1; print "1..27\n"; }
 END {print "not ok $loaded\n" if $loaded;}
 require Tie::Hash;
 print "ok $loaded\n"; $loaded++;
@@ -82,18 +82,50 @@ foreach my $I (keys %FileNMsgs)
       }
 }
 
-my %Aliases; tie %Aliases, 'CfgTie::TieAliases';
+my %Aliases;
+tie %Aliases, 'CfgTie::TieAliases';
 print "ok $loaded\n"; $loaded++;
+tie %Aliases, 'CfgTie::TieAliases', 'test/aliases';
+my $N=scalar keys %Aliases;
+if ($N < 1)
+{
+   print "not ok $loaded\n";
+}
+else
+{
+   print "ok $loaded\n";
+}
+$loaded++;
 my %Generic; tie %Generic, 'CfgTie::TieGeneric';
 print "ok $loaded\n"; $loaded++;
 my %Groups; tie %Groups, 'CfgTie::TieGroup';
 print "ok $loaded\n"; $loaded++;
-my %Groups2; tie %Groups2, 'CfgTie::TieGroup', 'test/group';
+my %Groups2; tie %Groups2, 'CfgTie::TieGroup', 't/group';
 print "ok $loaded\n"; $loaded++;
+$N=scalar keys %Groups2;
+if ($N < 1)
+{
+   print "not ok $loaded\n";
+}
+else
+{
+   print "ok $loaded\n";
+}
+$loaded++;
 #We use our own named.boot file since not all machines have one (ie, people who
 #have not installed named!)
-my %DNS; tie %DNS, 'CfgTie::TieNamed','test/named.boot';
+my %DNS; tie %DNS, 'CfgTie::TieNamed','t/named.boot';
 print "ok $loaded\n"; $loaded++;
+$N=scalar keys %DNS;
+if ($N < 1)
+{
+   print "not ok $loaded\n";
+}
+else
+{
+   print "ok $loaded\n";
+}
+$loaded++;
 my %Users; tie %Users, 'CfgTie::TieUser';
 print "ok $loaded\n"; $loaded++;
 

@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-#Copyright 1998-1999, Randall Maas.  All rights reserved.  This program is free
+#Copyright 1998-2001, Randall Maas.  All rights reserved.  This program is free
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.
 
@@ -8,10 +8,9 @@ use strict 'refs';
 use CfgTie::filever;
 use Secure::File;
 use vars qw($VERSION @ISA);
-use AutoLoader;
 use AutoLoader 'AUTOLOAD';
 @ISA=qw(AutoLoader);
-$VERSION='0.4';
+$VERSION='0.41';
 
 =head1 NAME
 
@@ -183,32 +182,10 @@ Randall Maas (L<mailto:randym@acm.org>, L<http://www.hamline.edu/~rcmaas/>)
 
 my $FNum=137;
 my %Files2CheckIn;
-my @Thingies;
+local @Thingies=();
 1;
-__END__
 
-sub RCS_Handshake($)
-{
-   my $self=shift;
-   if (!exists $self->{RCS}) {return;}
-
-   my $RObj = $self->{RCS};
-   if (defined $RObj->comments)
-     {
-        my $locker = $RObj->lock;
-
-        #Do we need to check it out?
-        if (defined $locker) {return;}
-   
-        #Check it out with the locks set
-        $RObj->co('-l');
-     }
-
-   #Add it to the list of things to check in
-   $Files2CheckIn{$self->{Path}} = $RObj;
-}
-
-sub END
+END
 {
    #This takes the current set of outstanding ties and rewrites the files
    foreach my $I (@Thingies)
@@ -303,10 +280,33 @@ sub END
    %Files2CheckIn=();
 }
 
+__END__
+
+sub RCS_Handshake($)
+{
+   my $self=shift;
+   if (!exists $self->{RCS}) {return;}
+
+   my $RObj = $self->{RCS};
+   if (defined $RObj->comments)
+     {
+        my $locker = $RObj->lock;
+
+        #Do we need to check it out?
+        if (defined $locker) {return;}
+   
+        #Check it out with the locks set
+        $RObj->co('-l');
+     }
+
+   #Add it to the list of things to check in
+   $Files2CheckIn{$self->{Path}} = $RObj;
+}
 sub new {TIEHASH(@_);}
 sub TIEHASH
 {
    my ($self,$x,@Extra)=@_;
+   my $class=ref($self)||$self;
    my $RCSObj=undef;
    my $Node={};
 
@@ -329,7 +329,7 @@ sub TIEHASH
           }
      }
 
-   $self = bless $Node, $self;
+   $self = bless $Node, $class;
    push @Thingies, $self;
    $self->scan(@Extra);
    if (exists $Node->{Path} && defined $RCSObj && !defined $RCSObj->file)

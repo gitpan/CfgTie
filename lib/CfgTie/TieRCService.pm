@@ -1,13 +1,7 @@
-#Copyright 1998-1999, Randall Maas.  All rights reserved.  This program is free
+#Copyright 1998-2001, Randall Maas.  All rights reserved.  This program is free
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.
 
-
-package CfgTie::TieRCService;
-use CfgTie::filever;
-use Secure::File;
-my %Services;
-scan (\%Services);
 
 package CfgTie::TieRCServ_rec;
 use POSIX;
@@ -15,8 +9,6 @@ use CfgTie::filever;
 use Secure::File;
 my %ServScript;
 1;
-
-package CfgTie::TieRCService;
 
 =head1 NAME
 
@@ -119,6 +111,8 @@ Randall Maas (L<randym@acm.org>)
 
 =cut
 
+package CfgTie::TieRCService;
+
 # Still need a tiehash, ability to add it to a run level, change its order
 # in the runlevel, remove it from the runlevel
 
@@ -128,6 +122,7 @@ sub scan ($)
 {
    my $T= shift;
    my $F =CfgTie::filever::open("/sbin/chkconfig --list|");
+   return unless $F;
    while (<$F>)
     {
 	#We do this in the most flexible way we can think of... to allow for
@@ -285,7 +280,7 @@ sub proc_id($)
    if (!defined $key || !-e "/var/run/$key.pid") {return undef;}
 
    #use the canonically process ID
-   my $F = new Seucre::File "</var/run/$key.pid" or return undef;
+   my $F = new Secure::File "</var/run/$key.pid" or return undef;
    my ($I,$pid);
    while (<$F>)
     {
@@ -538,3 +533,10 @@ sub reload($)
           }
      }
 }
+
+package CfgTie::TieRCService;
+use CfgTie::filever;
+use Secure::File;
+my %Services;
+scan (\%Services);
+1;

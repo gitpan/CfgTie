@@ -38,3 +38,6 @@ lib/Secure/File.pm
 makefile.inc
 t/test-sf.t
 t/test.t
+t/group
+t/named.boot
+test/aliases

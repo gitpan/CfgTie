@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w
-#Copyright 1998-1999, Randall Maas.  All rights reserved.  This program is free
+#Copyright 1998-2001, Randall Maas.  All rights reserved.  This program is free
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.
 
 #This is the magical make maker.  It does even more complicated stuff than
-#normal becauseI use TeXInfo and want it linked in.
+#normal because I use TeXInfo and want it linked in.
 
 use ExtUtils::MakeMaker;
 
@@ -16,7 +16,7 @@ my $dir = cwd();
 $dir =~ s/^.*\/([^\/]+)$/$1/;
 
 $ModName=$dir;
-$VERSION="0.4";
+$VERSION="0.41";
 
 my $Pfiles="lib/$ModName/". join(".pm lib/$ModName/",
         'TieRCService','Cfgfile', 'CfgArgs',

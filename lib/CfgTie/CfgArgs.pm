@@ -1,11 +1,13 @@
 #!/usr/bin/perl
-#Copyright 1998-1999, Randall Maas.  All rights reserved.  This program is free
+#Copyright 1998-2001, Randall Maas.  All rights reserved.  This program is free
 #software; you can redistribute it and/or modify it under the same terms as
 #PERL itself.                                                                   
 
 package CfgTie::CfgArgs;
 require Exporter;
 @ISA=qw(Exporter);
+use vars qw($VERSION);
+$VERSION='0.41';
 @EXPORT_OK=qw(Fatal Err $Prg);
 
 =head1 NAME
